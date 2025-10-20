@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DataServiceLayer/DataServiceLayer.csproj" />
+  <Project Path="WebServiceLayer/WebServiceLayer.csproj" />
+</Solution>
