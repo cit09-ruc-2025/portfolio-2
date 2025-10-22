@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="BackendTests/BackendTests.csproj" Id="59ec3174-a721-4aca-867f-faf514bb2212" />
   <Project Path="DataServiceLayer/DataServiceLayer.csproj" />
   <Project Path="WebServiceLayer/WebServiceLayer.csproj" />
 </Solution>
