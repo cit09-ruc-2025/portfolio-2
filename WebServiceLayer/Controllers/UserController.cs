@@ -6,6 +6,7 @@ using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using Microsoft.AspNetCore.Mvc;
 using WebServiceLayer.Models;
+using WebServiceLayer.Utils;
 
 namespace WebServiceLayer.Controllers
 {
@@ -45,11 +46,13 @@ namespace WebServiceLayer.Controllers
                 return BadRequest(new { errors = validationErrors });
             }
 
+            var PasswordHasher = new PasswordHasher();
+
             var newUser = new User
             {
                 Email = user.Email,
                 Username = user.Username,
-                HashedPassword = user.Password,
+                HashedPassword = PasswordHasher.HashPassword(user.Password),
                 ProfileUrl = user.ProfileUrl
             };
 
