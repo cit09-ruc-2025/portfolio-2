@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using DataServiceLayer.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using WebServiceLayer.Models;
 using WebServiceLayer.Utils;
 
@@ -14,10 +18,12 @@ namespace WebServiceLayer.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -37,11 +43,32 @@ namespace WebServiceLayer.Controllers
                 return BadRequest(new { message = "INVALID_CREDENTIALS" });
             }
 
-            return Ok();
+            var claims = new List<Claim>
+            {
+                new Claim("id",user.Id.ToString())
+            };
+
+            var secret = _configuration.GetSection("Auth:Secret").Value;
+            var expiresIn = _configuration.GetSection("Auth:ExpiresInDays").Value;
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddDays(int.Parse(expiresIn)),
+            signingCredentials: creds
+            );
+
+            var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new
+            {
+                username = user.Username,
+                token = jwtToken
+            });
 
         }
-
-
-
     }
 }
