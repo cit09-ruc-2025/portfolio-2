@@ -6,14 +6,17 @@ namespace DataServiceLayer.Models;
 
 public partial class MediaDbContext : DbContext
 {
-    public MediaDbContext()
+    private readonly string? _connectionString;
+
+    public MediaDbContext(string? connectionString)
     {
+        _connectionString = connectionString;
     }
 
-    public MediaDbContext(DbContextOptions<MediaDbContext> options)
-        : base(options)
-    {
-    }
+    // public MediaDbContext(DbContextOptions<MediaDbContext> options)
+    //     : base(options)
+    // {
+    // }
 
     public DbSet<DvdRelease> DvdReleases { get; set; }
 
@@ -52,6 +55,13 @@ public partial class MediaDbContext : DbContext
     public DbSet<User> Users { get; set; }
 
     public DbSet<WatchHistory> WatchHistories { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.UseNpgsql(_connectionString);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

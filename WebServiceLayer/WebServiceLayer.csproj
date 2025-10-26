@@ -15,4 +15,8 @@
     <Folder Include="DTOs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DataServiceLayer\DataServiceLayer.csproj" />
+  </ItemGroup>
+
 </Project>
