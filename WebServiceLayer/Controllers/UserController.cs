@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebServiceLayer.Models;
 using WebServiceLayer.Utils;
@@ -59,7 +60,6 @@ namespace WebServiceLayer.Controllers
             _userService.CreateUser(newUser);
 
             return Created();
-
 
         }
     }
