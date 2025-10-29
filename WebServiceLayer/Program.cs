@@ -29,6 +29,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 
 builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
+builder.Services.AddSingleton<IGenreService>(new GenreService(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>

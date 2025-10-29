@@ -21,7 +21,7 @@ namespace WebServiceLayer.Controllers
         {
             _userService = userService;
         }
-
+        
         [HttpPost]
         public IActionResult CreateUser(CreateUserRequest user)
         {
