@@ -16,31 +16,54 @@ namespace WebServiceLayer.Controllers
             _playlistService = playlistService;
         }
 
-        [HttpPost("create")]
-        public IActionResult CreatePlaylist([FromQuery] Guid userID, [FromQuery] string title)
+        public class PlaylistCreateRequest
         {
-            var playlist = _playlistService.CreatePlaylist(userID, title);
+            public Guid UserId { get; set; }
+            public string Title { get; set; } = null!;
+        }
+
+        [HttpPost("create")]
+        public IActionResult CreatePlaylist([FromBody] PlaylistCreateRequest request)
+        {
+            var playlist = _playlistService.CreatePlaylist(request.UserId, request.Title);
             return Ok(playlist);
         }
 
-        [HttpPost("addMedia")]
-        public IActionResult AddMediaToPlaylist(Guid playlistId, string mediaId)
+        public class AddMediaRequest
         {
-            var result = _playlistService.AddMediaToPlaylist(playlistId, mediaId);
+            public Guid PlaylistId { get; set; }
+            public string MediaId { get; set; } = null!;
+        }
+
+        [HttpPost("addMedia")]
+        public IActionResult AddMediaToPlaylist([FromBody] AddMediaRequest request)
+        {
+            var result = _playlistService.AddMediaToPlaylist(request.PlaylistId, request.MediaId);
             return Ok(result);
+        }
+
+        public class RemoveMediaRequest
+        {
+            public Guid PlaylistId { get; set; }
+            public string MediaId { get; set; } = null!;
         }
 
         [HttpPost("removeMedia")]
-        public IActionResult RemoveMediaFromPlaylist(Guid playlistId, string mediaId)
+        public IActionResult RemoveMediaFromPlaylist([FromBody] RemoveMediaRequest request)
         {
-            var result = _playlistService.RemoveMediaFromPlaylist(playlistId, mediaId);
+            var result = _playlistService.RemoveMediaFromPlaylist(request.PlaylistId, request.MediaId);
             return Ok(result);
         }
 
-        [HttpDelete("delete/{playlistId}")]
-        public IActionResult DeletePlaylist(Guid playlistId)
+        public class DeletePlaylistRequest
         {
-            var result = _playlistService.DeletePlaylist(playlistId);
+            public Guid PlaylistId { get; set; }
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult DeletePlaylist([FromBody] DeletePlaylistRequest request)
+        {
+            var result = _playlistService.DeletePlaylist(request.PlaylistId);
             return Ok(result);
         }
 

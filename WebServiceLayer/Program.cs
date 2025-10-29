@@ -30,7 +30,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 
 builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
-builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+builder.Services.AddSingleton<IPlaylistService, PlaylistService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
