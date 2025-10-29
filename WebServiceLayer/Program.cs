@@ -1,5 +1,6 @@
 using System.Text;
 using DataServiceLayer;
+using DataServiceLayer.Services;
 using DataServiceLayer.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +30,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 
 builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
+builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
