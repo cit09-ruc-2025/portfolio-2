@@ -1,11 +1,20 @@
 using DataServiceLayer.Models;
 using DataServiceLayer.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Data.Common;
 
 namespace DataServiceLayer.Services
 {
     public class PlaylistService : IPlaylistService
     {
-        private List<Playlist> playlists = new List<Playlist>();
+        private readonly MediaDbContext _db;
+
+        public PlaylistService(string? connectionString)
+        {
+            _db = new MediaDbContext(connectionString);
+        }
 
         public Playlist CreatePlaylist(Guid userID, string title)
         {
@@ -18,22 +27,26 @@ namespace DataServiceLayer.Services
                 UpdatedAt = DateTime.UtcNow
             };
 
-            playlists.Add(playlist);
-
+            _db.Playlists.Add(playlist);
+            _db.SaveChanges();
             return playlist;
         }
 
         public bool AddMediaToPlaylist(Guid playlistId, string mediaId)
         {
-            var playlist = playlists.FirstOrDefault(p => p.Id == playlistId);
+            var playlist = _db.Playlists
+                .Where(p => p.Id == playlistId)
+                .FirstOrDefault();
             if (playlist != null)
             {
                 var playlistItem = new PlaylistItem
                 {
+                    Id = Guid.NewGuid(),
                     MediaId = mediaId,
                     PlaylistId = playlistId
                 };
-                playlist.PlaylistItems.Add(playlistItem);
+                _db.PlaylistItems.Add(playlistItem);
+                _db.SaveChanges();
                 return true;
             }
             return false;
@@ -41,26 +54,27 @@ namespace DataServiceLayer.Services
 
         public bool RemoveMediaFromPlaylist(Guid playlistId, string mediaId)
         {
-            var playlist = playlists.FirstOrDefault(p => p.Id == playlistId);
-            if (playlist != null)
+            var item = _db.PlaylistItems
+            .FirstOrDefault(p => p.PlaylistId == playlistId && p.MediaId == mediaId);
+            if (item != null)
             {
-                var item = playlist.PlaylistItems.FirstOrDefault(i => i.MediaId == mediaId);
-                if (item != null)
-                {
-                    playlist.PlaylistItems.Remove(item);
-                    playlist.UpdatedAt = DateTime.UtcNow;
-                    return true;
-                }
+                _db.PlaylistItems.Remove(item);
+
+                var playlist = _db.Playlists.First(p => p.Id == playlistId);
+                playlist.UpdatedAt = DateTime.UtcNow;
+                return true;
             }
             return false;
         }
 
         public bool DeletePlaylist(Guid playlistId)
         {
-            var playlist = playlists.FirstOrDefault(p => p.Id == playlistId);
+            var playlist = _db.Playlists
+                .FirstOrDefault(p => p.Id == playlistId);
             if (playlist != null)
             {
-                playlists.Remove(playlist);
+                _db.Playlists.Remove(playlist);
+                _db.SaveChanges();
                 return true;
             }
             return false;
@@ -68,7 +82,15 @@ namespace DataServiceLayer.Services
 
         public List<Playlist> GetPlaylistsByUserId(Guid userId)
         {
-            return playlists.Where(p => p.UserId == userId).ToList();
+            return _db.Playlists
+            .Where(p => p.UserId == userId)
+            .ToList();
+        }
+
+        public Playlist? GetPlaylistById(Guid playlistId)
+        {
+            return _db.Playlists
+            .FirstOrDefault(p => p.Id == playlistId);
         }
 
     }

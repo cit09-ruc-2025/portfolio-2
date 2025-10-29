@@ -53,6 +53,8 @@ public partial class MediaDbContext : DbContext
     public DbSet<TitleAttribute> TitleAttributes { get; set; }
 
     public DbSet<User> Users { get; set; }
+    public DbSet<Playlist> Playlists { get; set; }
+    public DbSet<PlaylistItem> PlaylistItems { get; set; }
 
     public DbSet<WatchHistory> WatchHistories { get; set; }
 

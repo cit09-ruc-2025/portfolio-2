@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using System;
+using Microsoft.Extensions.Configuration.UserSecrets;
+using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/playlist")]
     public class PlaylistController : ControllerBase
     {
         private readonly IPlaylistService _playlistService;
@@ -16,12 +18,6 @@ namespace WebServiceLayer.Controllers
             _playlistService = playlistService;
         }
 
-        public class PlaylistCreateRequest
-        {
-            public Guid UserId { get; set; }
-            public string Title { get; set; } = null!;
-        }
-
         [HttpPost("create")]
         public IActionResult CreatePlaylist([FromBody] PlaylistCreateRequest request)
         {
@@ -29,41 +25,44 @@ namespace WebServiceLayer.Controllers
             return Ok(playlist);
         }
 
-        public class AddMediaRequest
+        [HttpPost("user/{userId}/{playlistId}/add")]
+        public IActionResult AddMediaToPlaylist(
+            [FromRoute] Guid userId,
+            [FromRoute] Guid playlistId,
+            [FromBody] AddMediaRequest request)
         {
-            public Guid PlaylistId { get; set; }
-            public string MediaId { get; set; } = null!;
-        }
+            var playlist = _playlistService.GetPlaylistById(playlistId);
+            if (playlist == null) return NotFound(new { message = "Playlist not found" });
+            if (playlist.UserId != userId) return Forbid("You do not have permission");
 
-        [HttpPost("addMedia")]
-        public IActionResult AddMediaToPlaylist([FromBody] AddMediaRequest request)
-        {
-            var result = _playlistService.AddMediaToPlaylist(request.PlaylistId, request.MediaId);
+            var result = _playlistService.AddMediaToPlaylist(playlistId, request.MediaId);
             return Ok(result);
         }
 
-        public class RemoveMediaRequest
+        [HttpPost("user/{userId}/{playlistId}/remove")]
+        public IActionResult RemoveMediaFromPlaylist(
+            [FromRoute] Guid userId,
+            [FromRoute] Guid playlistId,
+            [FromBody] AddMediaRequest request)
         {
-            public Guid PlaylistId { get; set; }
-            public string MediaId { get; set; } = null!;
-        }
+            var playlist = _playlistService.GetPlaylistById(playlistId);
+            if (playlist == null) return NotFound(new { message = "Playlist not found" });
+            if (playlist.UserId != userId) return Forbid("You do not have permission");
 
-        [HttpPost("removeMedia")]
-        public IActionResult RemoveMediaFromPlaylist([FromBody] RemoveMediaRequest request)
-        {
-            var result = _playlistService.RemoveMediaFromPlaylist(request.PlaylistId, request.MediaId);
+            var result = _playlistService.RemoveMediaFromPlaylist(playlistId, request.MediaId);
             return Ok(result);
         }
 
-        public class DeletePlaylistRequest
+        [HttpDelete("user/{userId}/{playlistId}")]
+        public IActionResult DeletePlaylist(
+            [FromRoute] Guid userId,
+            [FromRoute] Guid playlistId)
         {
-            public Guid PlaylistId { get; set; }
-        }
+            var playlist = _playlistService.GetPlaylistById(playlistId);
+            if (playlist == null) return NotFound(new { message = "Playlist not found" });
+            if (playlist.UserId != userId) return Forbid("You do not have permission");
 
-        [HttpDelete("delete")]
-        public IActionResult DeletePlaylist([FromBody] DeletePlaylistRequest request)
-        {
-            var result = _playlistService.DeletePlaylist(request.PlaylistId);
+            var result = _playlistService.DeletePlaylist(playlistId);
             return Ok(result);
         }
 
