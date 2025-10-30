@@ -34,6 +34,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 
 builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
+builder.Services.AddSingleton<IPlaylistService, PlaylistService>();
+builder.Services.AddSingleton<IRatingService>(new RatingService(connectionString));
+builder.Services.AddSingleton<IMediaService>(new MediaService(connectionString));
 
 builder.Services.AddScoped<IPlaylistService>(provider =>
     new PlaylistService(connectionString));
