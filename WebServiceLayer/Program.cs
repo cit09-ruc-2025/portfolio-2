@@ -4,6 +4,8 @@ using DataServiceLayer.Services;
 using DataServiceLayer.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Mapster;
+using Scalar.AspNetCore;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -34,6 +36,10 @@ builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(provider =>
     new PlaylistService(connectionString));
 
+builder.Services.AddScoped<IWatchHistoryService>(provider =>
+    new WatchHistoryService(connectionString));
+
+builder.Services.AddMapster();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
@@ -54,6 +60,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
