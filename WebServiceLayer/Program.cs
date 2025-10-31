@@ -36,6 +36,9 @@ builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
 builder.Services.AddScoped<IPlaylistService>(provider =>
     new PlaylistService(connectionString));
 
+builder.Services.AddScoped<IWatchHistoryService>(provider =>
+    new WatchHistoryService(connectionString));
+
 builder.Services.AddMapster();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
