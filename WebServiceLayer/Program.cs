@@ -4,6 +4,7 @@ using DataServiceLayer.Services;
 using DataServiceLayer.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -54,6 +55,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
