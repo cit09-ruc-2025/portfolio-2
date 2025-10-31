@@ -1,0 +1,59 @@
+﻿using DataServiceLayer.Interfaces;
+using DataServiceLayer.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DataServiceLayer.Services
+{
+    public class WatchHistoryService : IWatchHistoryService
+    {
+        private readonly string? _connectionString;
+
+        public WatchHistoryService(string? connectionString)
+        {
+            _connectionString = connectionString;
+        }
+        private MediaDbContext CreateContext() => new(_connectionString);
+        public List<WatchHistory> GetWatchHistory(Guid userGuid)
+        {
+            var context = CreateContext();
+            return context.WatchHistories.Where(wh => wh.UserId == userGuid).ToList();
+        }
+
+        public bool AddToWatched(string mediaId, Guid userGuid)
+        {
+            var context = CreateContext();
+
+            var exists = context.WatchHistories.Any(wh => wh.UserId == userGuid && wh.MediaId == mediaId);
+
+            if (exists) return false;
+
+            context.WatchHistories.Add(new WatchHistory
+            {
+                MediaId = mediaId,
+                UserId = userGuid,
+                CreatedAt = DateTime.Now
+            });
+
+            context.SaveChanges();
+            return true;
+        }
+
+        public bool RemoveFromWatched(string mediaId, Guid userGuid)
+        {
+            var context = CreateContext();
+
+            var toBeRemoved = context.WatchHistories.FirstOrDefault(wh => wh.UserId == userGuid && wh.MediaId == mediaId);
+
+            if (toBeRemoved == null) return false;
+
+            context.WatchHistories.Remove(toBeRemoved);
+            context.SaveChanges();
+
+            return true;
+        }
+    }
+}
