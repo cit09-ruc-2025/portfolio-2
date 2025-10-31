@@ -39,6 +39,10 @@ builder.Services.AddScoped<IPlaylistService>(provider =>
 builder.Services.AddScoped<IWatchHistoryService>(provider =>
     new WatchHistoryService(connectionString));
 
+builder.Services.AddScoped<IFavoriteService>(provider =>
+    new FavoriteService(connectionString));
+
+
 builder.Services.AddMapster();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
