@@ -23,8 +23,8 @@ namespace DataServiceLayer.Services
                 Id = Guid.NewGuid(),
                 UserId = userID,
                 Title = title,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)
             };
 
             _db.Playlists.Add(playlist);
@@ -61,7 +61,7 @@ namespace DataServiceLayer.Services
                 _db.PlaylistItems.Remove(item);
 
                 var playlist = _db.Playlists.First(p => p.Id == playlistId);
-                playlist.UpdatedAt = DateTime.UtcNow;
+                playlist.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
                 return true;
             }
             return false;

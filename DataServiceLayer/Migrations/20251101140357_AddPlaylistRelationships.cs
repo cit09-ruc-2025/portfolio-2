@@ -11,10 +11,23 @@ namespace DataServiceLayer.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:media_type", "tvShort,movie,tvMovie,short,tvMiniSeries,videoGame,tvEpisode,video,tvSpecial,tvSeries")
-                .Annotation("Npgsql:Enum:title_type", "working,original,,imdbDisplayfestival,workingalternative,dvd,imdbDisplay,tv,imdbDisplaydvd,alternative,festival,video")
-                .Annotation("Npgsql:PostgresExtension:pgcrypto", ",,");
+            // migrationBuilder.AlterDatabase()
+            //     .Annotation("Npgsql:Enum:media_type", "tvShort,movie,tvMovie,short,tvMiniSeries,videoGame,tvEpisode,video,tvSpecial,tvSeries")
+            //     .Annotation("Npgsql:Enum:title_type", "working,original,,imdbDisplayfestival,workingalternative,dvd,imdbDisplay,tv,imdbDisplaydvd,alternative,festival,video")
+            //     .Annotation("Npgsql:PostgresExtension:pgcrypto", ",,");
+
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'media_type') THEN
+                    CREATE TYPE media_type AS ENUM ('tvShort','movie','tvMovie','short','tvMiniSeries','videoGame','tvEpisode','video','tvSpecial','tvSeries');
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'title_type') THEN
+                    CREATE TYPE title_type AS ENUM ('working','original','imdbDisplayfestival','workingalternative','dvd','imdbDisplay','tv','imdbDisplaydvd','alternative','festival','video');
+                END IF;
+                END$$;
+                ");
+
 
             migrationBuilder.CreateTable(
                 name: "genres",
