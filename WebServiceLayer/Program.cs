@@ -44,6 +44,8 @@ builder.Services.AddScoped<IWatchHistoryService>(provider =>
 builder.Services.AddScoped<IFavoriteService>(provider =>
     new FavoriteService(connectionString));
 
+builder.Services.AddScoped<IPeopleService>(provider =>
+    new PeopleService(connectionString));
 
 builder.Services.AddMapster();
 
