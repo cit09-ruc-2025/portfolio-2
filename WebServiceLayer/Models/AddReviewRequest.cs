@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace WebServiceLayer.Models
 {
-    public class AddRatingRequest
+    public class AddReviewRequest
     {
         [Required(ErrorMessage = "RATING_REQUIRED")]
         [Range(1, 10, ErrorMessage = "RATING_OUT_OF_RANGE")]
         public required int Rating { get; set; }
+
+        [MaxLength(250, ErrorMessage = "REVIEW_MAX")]
+        public string? Review { get; set; }
     }
 }

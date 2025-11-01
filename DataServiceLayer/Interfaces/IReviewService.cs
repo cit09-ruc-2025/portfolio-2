@@ -6,9 +6,9 @@ using DataServiceLayer.Models;
 
 namespace DataServiceLayer.Interfaces
 {
-    public interface IRatingService
+    public interface IReviewService
     {
-        public Task UpsertRating(Rating rating);
+        public Task UpsertReview(ReviewParam review);
         public Rating? GetById(Rating rating);
 
     }

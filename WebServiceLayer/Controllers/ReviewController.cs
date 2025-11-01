@@ -11,22 +11,22 @@ using WebServiceLayer.Models;
 namespace WebServiceLayer.Controllers
 {
     [ApiController]
-    [Route("api/rating")]
-    public class RatingController : ControllerBase
+    [Route("api/review")]
+    public class ReviewController : ControllerBase
     {
 
-        private readonly IRatingService _ratingService;
+        private readonly IReviewService _reviewService;
         private readonly IMediaService _mediaService;
 
-        public RatingController(IRatingService ratingService, IMediaService mediaService)
+        public ReviewController(IReviewService reviewService, IMediaService mediaService)
         {
-            _ratingService = ratingService;
+            _reviewService = reviewService;
             _mediaService = mediaService;
         }
 
         [Authorize]
         [HttpPut("{mediaId}")]
-        public async Task<IActionResult> AddReview([FromRoute] string mediaId, [FromBody] AddRatingRequest rating)
+        public async Task<IActionResult> AddReview([FromRoute] string mediaId, [FromBody] AddReviewRequest review)
         {
             if (string.IsNullOrWhiteSpace(mediaId))
             {
@@ -54,17 +54,17 @@ namespace WebServiceLayer.Controllers
 
             var userId = Guid.Parse(User.FindFirst("id")?.Value);
 
-
-            var newRating = new Rating
+            var newReview = new ReviewParam
             {
                 MediaId = mediaId,
                 UserId = userId,
-                Rating1 = rating.Rating
+                Rating = review.Rating,
+                Review = review.Review
             };
 
-            await _ratingService.UpsertRating(newRating);
+            await _reviewService.UpsertReview(newReview);
 
-            return Created();
+            return Ok();
         }
 
     }
