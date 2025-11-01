@@ -26,7 +26,7 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoritePeople))]
-        public ActionResult GetFavoritePeople(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<List<FavoritePeopleDTO>> GetFavoritePeople(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
             var favorites = _favoriteService.GetFavoritePeople(userId, pageNumber, pageSize);
 

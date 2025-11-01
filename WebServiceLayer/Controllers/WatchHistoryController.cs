@@ -28,7 +28,7 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(Get))]
-        public ActionResult Get(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<List<WatchHistoryDTO>> Get(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
             var watched = _mediaService.GetWatchHistory(userId, pageNumber, pageSize);
 

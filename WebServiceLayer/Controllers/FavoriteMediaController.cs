@@ -27,7 +27,7 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoriteMedia))]
-        public ActionResult GetFavoriteMedia(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<List<FavoriteMediaDTO>> GetFavoriteMedia(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
             var favorites = _favoriteService.GetFavoriteMedia(userId, pageNumber, pageSize);
 
