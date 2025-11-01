@@ -3,10 +3,12 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebServiceLayer.DTOs.Requests;
 using WebServiceLayer.DTOs.Responses;
 
 namespace WebServiceLayer.Controllers
 {
+    [Authorize(Policy = "SameUser")]
     [Route("api/user/{userId:guid}/favorite-people")]
     [ApiController]
     public class FavoritePeopleController : ControllerBase
@@ -22,6 +24,7 @@ namespace WebServiceLayer.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoritePeople))]
         public ActionResult GetFavoritePeople(Guid userId)
         {
@@ -33,9 +36,9 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(Guid userId, [FromBody] string peopleId)
+        public ActionResult Post(Guid userId, [FromBody] AddFavoritePeopleRequest request)
         {
-            var success = _favoriteService.FavoritePerson(userId, peopleId);
+            var success = _favoriteService.FavoritePerson(userId, request.PeopleId);
             if (!success) return BadRequest("Failed while adding to favorites");
             var location = GetUrl(nameof(GetFavoritePeople), new { userId });
             return Created(location!, null);

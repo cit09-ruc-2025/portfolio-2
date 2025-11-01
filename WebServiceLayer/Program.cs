@@ -1,11 +1,13 @@
-using System.Text;
 using DataServiceLayer;
-using DataServiceLayer.Services;
 using DataServiceLayer.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using DataServiceLayer.Services;
 using Mapster;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Text;
+using WebServiceLayer.Auth_Middleware;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -57,6 +59,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthorizationBuilder()
+                    .AddPolicy("SameUser", policy => policy.Requirements.Add(new SameUserRequirement()));
+
+builder.Services.AddSingleton<IAuthorizationHandler, SameUserHandler>();
 
 var app = builder.Build();
 

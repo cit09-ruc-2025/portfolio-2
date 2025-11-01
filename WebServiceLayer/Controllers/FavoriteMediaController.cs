@@ -1,11 +1,15 @@
 ﻿using DataServiceLayer.Interfaces;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebServiceLayer.DTOs.Requests;
 using WebServiceLayer.DTOs.Responses;
+using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
 {
+    [Authorize(Policy = "SameUser")]
     [Route("api/user/{userId:guid}/favorite-media")]
     [ApiController]
     public class FavoriteMediaController : ControllerBase
@@ -21,6 +25,7 @@ namespace WebServiceLayer.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoriteMedia))]
         public ActionResult GetFavoriteMedia(Guid userId)
         {
@@ -32,9 +37,9 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(Guid userId, [FromBody] string mediaId)
+        public ActionResult Post(Guid userId, [FromBody] AddFavoriteMediaRequest request)
         {
-            var success = _favoriteService.FavoriteMedia(userId, mediaId);
+            var success = _favoriteService.FavoriteMedia(userId, request.MediaId);
             if (!success) return BadRequest("Failed while adding to favorites");
             var location = GetUrl(nameof(GetFavoriteMedia), new { userId });
             return Created(location!, null);
