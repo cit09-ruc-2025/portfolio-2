@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataServiceLayer.Helpers;
 
 namespace DataServiceLayer.Services
 {
@@ -17,10 +18,10 @@ namespace DataServiceLayer.Services
             _connectionString = connectionString;
         }
         private MediaDbContext CreateContext() => new(_connectionString);
-        public List<WatchHistory> GetWatchHistory(Guid userGuid)
+        public List<WatchHistory> GetWatchHistory(Guid userGuid, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            return context.WatchHistories.Where(wh => wh.UserId == userGuid).ToList();
+            return context.WatchHistories.Where(wh => wh.UserId == userGuid).ApplyPagination(pageNumber, pageSize).ToList();
         }
 
         public bool AddToWatched(string mediaId, Guid userGuid)

@@ -28,16 +28,15 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(Get))]
-        public ActionResult Get(Guid userId)
+        public ActionResult Get(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
-            var watched = _mediaService.GetWatchHistory(userId);
+            var watched = _mediaService.GetWatchHistory(userId, pageNumber, pageSize);
 
             if (watched == null || watched.Count == 0) return NoContent();
 
             return Ok(_mapper.Map<List<WatchHistoryDTO>>(watched));
         }
 
-        [Authorize]
         [HttpPost]
         public ActionResult Post(Guid userId, [FromBody] AddToWatchHistoryRequest request)
         {
