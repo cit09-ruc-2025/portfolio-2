@@ -11,6 +11,7 @@ using WebServiceLayer.Models;
 namespace WebServiceLayer.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/review")]
     public class ReviewController : ControllerBase
     {
@@ -24,7 +25,6 @@ namespace WebServiceLayer.Controllers
             _mediaService = mediaService;
         }
 
-        [Authorize]
         [HttpPut("{mediaId}")]
         public async Task<IActionResult> AddReview([FromRoute] string mediaId, [FromBody] AddReviewRequest review)
         {
@@ -67,5 +67,55 @@ namespace WebServiceLayer.Controllers
             return Ok();
         }
 
+        [HttpDelete("{mediaId}")]
+        public async Task<IActionResult> DeleteReview([FromRoute] string mediaId)
+        {
+            if (string.IsNullOrWhiteSpace(mediaId))
+            {
+                return BadRequest(new
+                {
+                    errors = new
+                    {
+                        mediaId = "MEDIA_ID_REQUIRED"
+                    }
+                });
+            }
+
+            var media = _mediaService.GetById(mediaId);
+
+            if (media == null)
+            {
+                return NotFound(new
+                {
+                    errors = new
+                    {
+                        mediaId = "MEDIA_NOT_FOUND"
+                    }
+                });
+            }
+
+            var userId = Guid.Parse(User.FindFirst("id")?.Value);
+
+            var existingRating = _reviewService.GetRatingById(mediaId, userId);
+
+            if (existingRating == null)
+            {
+                return BadRequest(new
+                {
+                    errors = new
+                    {
+                        review = "REVIEW_NOT_FOUND"
+                    }
+                });
+            }
+
+            await _reviewService.DeleteReview(existingRating);
+
+            return Ok();
+        }
+
     }
+
+
+
 }

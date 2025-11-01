@@ -9,7 +9,9 @@ namespace DataServiceLayer.Interfaces
     public interface IReviewService
     {
         public Task UpsertReview(ReviewParam review);
-        public Rating? GetById(Rating rating);
+        public Rating? GetRatingById(string mediaId, Guid userId);
+
+        public Task DeleteReview(Rating rating);
 
     }
 }

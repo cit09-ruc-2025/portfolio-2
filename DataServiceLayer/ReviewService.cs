@@ -44,7 +44,7 @@ namespace DataServiceLayer
                 }
 
                 var existingReview = await db.Reviews
-                                    .FirstOrDefaultAsync(x => x.MediaId == review.MediaId && x.UserId == review.UserId);
+                    .FirstOrDefaultAsync(x => x.MediaId == review.MediaId && x.UserId == review.UserId);
 
                 if (!string.IsNullOrWhiteSpace(review.Review))
                 {
@@ -89,13 +89,49 @@ namespace DataServiceLayer
 
         }
 
-        public Rating? GetById(Rating ratingParam)
+        public Rating? GetRatingById(string mediaId, Guid userId)
         {
             var db = new MediaDbContext(_connectionString);
 
-            var rating = db.Ratings.FirstOrDefault(x => x.MediaId == ratingParam.MediaId && x.UserId == ratingParam.UserId);
+            var rating = db.Ratings.FirstOrDefault(x => x.MediaId == mediaId && x.UserId == userId);
 
             return rating;
         }
+
+        public async Task DeleteReview(Rating rating)
+        {
+            await using var db = new MediaDbContext(_connectionString);
+
+            await using var transaction = await db.Database.BeginTransactionAsync();
+
+            try
+            {
+                db.Ratings.Remove(rating);
+
+                var existingReview = await db.Reviews
+                    .FirstOrDefaultAsync(x => x.MediaId == rating.MediaId && x.UserId == rating.UserId);
+
+                if (existingReview != null)
+                {
+                    db.Reviews.Remove(existingReview);
+
+                }
+
+                await db.SaveChangesAsync();
+
+                var mediaService = new MediaService(_connectionString);
+
+                await mediaService.UpdateMediaRating(rating.MediaId, db);
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+        }
+
     }
 }
