@@ -28,6 +28,7 @@ public partial class User
     public ICollection<UserList> Lists { get; set; } = new List<UserList>();
 
     public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+    public ICollection<Playlist> Playlists { get; set; } = new List<Playlist>();
 
     public ICollection<RecentlyViewed> RecentlyVieweds { get; set; } = new List<RecentlyViewed>();
 

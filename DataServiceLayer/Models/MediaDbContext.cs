@@ -647,6 +647,82 @@ public partial class MediaDbContext : DbContext
                 .HasConstraintName("watch_history_user_id_fkey");
         });
 
+        modelBuilder.Entity<Playlist>(entity =>
+{
+    entity.ToTable("playlists");
+    entity.HasKey(p => p.Id).HasName("playlists_pkey");
+
+    entity.Property(p => p.Id)
+        .HasDefaultValueSql("gen_random_uuid()")
+        .HasColumnName("id");
+
+    entity.Property(p => p.Title)
+        .HasMaxLength(100)
+        .IsRequired()
+        .HasColumnName("title");
+
+    entity.Property(p => p.Description)
+        .HasMaxLength(500)
+        .HasColumnName("description");
+
+    entity.Property(p => p.UserId)
+        .IsRequired()
+        .HasColumnName("user_id");
+
+    entity.Property(p => p.CreatedAt)
+        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+        .HasColumnType("timestamp without time zone")
+        .HasColumnName("created_at");
+
+    entity.Property(p => p.UpdatedAt)
+        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+        .HasColumnType("timestamp without time zone")
+        .HasColumnName("updated_at");
+
+    // Relationship: Playlist belongs to a User
+    entity.HasOne(p => p.User)
+        .WithMany(u => u.Playlists)
+        .HasForeignKey(p => p.UserId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .HasConstraintName("playlists_user_id_fkey");
+});
+
+        modelBuilder.Entity<PlaylistItem>(entity =>
+        {
+            entity.ToTable("playlist_items");
+            entity.HasKey(pi => pi.Id).HasName("playlist_items_pkey");
+
+            entity.Property(pi => pi.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+
+            entity.Property(pi => pi.PlaylistId)
+                .IsRequired()
+                .HasColumnName("playlist_id");
+
+            entity.Property(pi => pi.MediaId)
+                .HasMaxLength(50)
+                .IsRequired()
+                .HasColumnName("media_id");
+
+            entity.Property(pi => pi.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+
+            // Relationships
+            entity.HasOne(pi => pi.Playlist)
+                .WithMany(p => p.PlaylistItems)
+                .HasForeignKey(pi => pi.PlaylistId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("playlist_items_playlist_id_fkey");
+
+            entity.HasOne(pi => pi.Media)
+                .WithMany(p => p.PlaylistItems)
+                .HasForeignKey(pi => pi.MediaId)
+                .HasConstraintName("playlist_items_media_id_fkey");
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

@@ -60,4 +60,5 @@ public partial class Media
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
 
     public ICollection<UserList> Lists { get; set; } = new List<UserList>();
+    public ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
 }
