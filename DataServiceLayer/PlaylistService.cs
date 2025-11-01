@@ -16,13 +16,14 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public Playlist CreatePlaylist(Guid userID, string title)
+        public Playlist CreatePlaylist(Guid userID, string title, string? description)
         {
             var playlist = new Playlist
             {
                 Id = Guid.NewGuid(),
                 UserId = userID,
                 Title = title,
+                Description = description,
                 CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
                 UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)
             };

@@ -6,7 +6,7 @@ namespace DataServiceLayer.Interfaces
     public interface IPlaylistService
     {
 
-        Playlist CreatePlaylist(Guid userID, string title);
+        Playlist CreatePlaylist(Guid userID, string title, string? description);
         bool AddMediaToPlaylist(Guid playlistId, string mediaId);
         bool RemoveMediaFromPlaylist(Guid playlistId, string mediaId);
         bool DeletePlaylist(Guid playlistId);

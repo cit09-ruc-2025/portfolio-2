@@ -21,7 +21,7 @@ namespace WebServiceLayer.Controllers
         [HttpPost("create")]
         public IActionResult CreatePlaylist([FromBody] PlaylistCreateRequest request)
         {
-            var playlist = _playlistService.CreatePlaylist(request.UserId, request.Title);
+            var playlist = _playlistService.CreatePlaylist(request.UserId, request.Title, request.Description);
             return Ok(playlist);
         }
 
@@ -32,12 +32,16 @@ namespace WebServiceLayer.Controllers
             [FromBody] AddMediaRequest request)
         {
             var playlist = _playlistService.GetPlaylistById(playlistId);
-            if (playlist == null) return NotFound(new { message = "Playlist not found" });
-            if (playlist.UserId != userId) return Forbid("You do not have permission");
+            if (playlist == null)
+                return NotFound(new { message = "Playlist not found" });
+
+            if (playlist.UserId != userId)
+                return Unauthorized(new { message = "You do not have permission" });
 
             var result = _playlistService.AddMediaToPlaylist(playlistId, request.MediaId);
             return Ok(result);
         }
+
 
         [HttpPost("user/{userId}/{playlistId}/remove")]
         public IActionResult RemoveMediaFromPlaylist(
@@ -46,8 +50,12 @@ namespace WebServiceLayer.Controllers
             [FromBody] AddMediaRequest request)
         {
             var playlist = _playlistService.GetPlaylistById(playlistId);
-            if (playlist == null) return NotFound(new { message = "Playlist not found" });
-            if (playlist.UserId != userId) return Forbid("You do not have permission");
+            if (playlist == null)
+                return NotFound(new { message = "Playlist not found" });
+                
+            if (playlist.UserId != userId) 
+                return Unauthorized(new { message = "You do not have permission" });
+
 
             var result = _playlistService.RemoveMediaFromPlaylist(playlistId, request.MediaId);
             return Ok(result);
@@ -59,8 +67,11 @@ namespace WebServiceLayer.Controllers
             [FromRoute] Guid playlistId)
         {
             var playlist = _playlistService.GetPlaylistById(playlistId);
-            if (playlist == null) return NotFound(new { message = "Playlist not found" });
-            if (playlist.UserId != userId) return Forbid("You do not have permission");
+            if (playlist == null) 
+                return NotFound(new { message = "Playlist not found" });
+
+            if (playlist.UserId != userId)
+                return Unauthorized(new { message = "You do not have permission" });
 
             var result = _playlistService.DeletePlaylist(playlistId);
             return Ok(result);
