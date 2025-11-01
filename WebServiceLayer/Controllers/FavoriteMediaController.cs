@@ -27,9 +27,9 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoriteMedia))]
-        public ActionResult GetFavoriteMedia(Guid userId)
+        public ActionResult GetFavoriteMedia(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
-            var favorites = _favoriteService.GetFavoriteMedia(userId);
+            var favorites = _favoriteService.GetFavoriteMedia(userId, pageNumber, pageSize);
 
             if (favorites == null || favorites.Count == 0) return NoContent();
 

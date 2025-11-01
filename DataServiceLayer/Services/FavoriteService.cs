@@ -1,5 +1,6 @@
 ﻿using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
+using DataServiceLayer.Helpers;
 
 namespace DataServiceLayer.Services
 {
@@ -97,17 +98,17 @@ namespace DataServiceLayer.Services
 
         }
 
-        public List<FavoritePerson> GetFavoritePeople(Guid userId)
+        public List<FavoritePerson> GetFavoritePeople(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            var favorites = context.FavoritePeople.Where(fp => fp.UserId == userId).ToList();
+            var favorites = context.FavoritePeople.Where(fp => fp.UserId == userId).ApplyPagination(pageNumber, pageSize).ToList();
             return favorites;
         }
 
-        public List<FavoriteMedia> GetFavoriteMedia(Guid userId)
+        public List<FavoriteMedia> GetFavoriteMedia(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            var favorites = context.FavoriteMedia.Where(fp => fp.UserId == userId).ToList();
+            var favorites = context.FavoriteMedia.Where(fp => fp.UserId == userId).ApplyPagination(pageNumber, pageSize).ToList();
             return favorites;
         }
     }

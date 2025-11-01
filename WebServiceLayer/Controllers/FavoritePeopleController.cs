@@ -26,9 +26,9 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoritePeople))]
-        public ActionResult GetFavoritePeople(Guid userId)
+        public ActionResult GetFavoritePeople(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
-            var favorites = _favoriteService.GetFavoritePeople(userId);
+            var favorites = _favoriteService.GetFavoritePeople(userId, pageNumber, pageSize);
 
             if (favorites == null || favorites.Count == 0) return NoContent();
 
