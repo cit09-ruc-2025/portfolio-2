@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataServiceLayer.Models;
 
@@ -61,4 +62,19 @@ public partial class Media
 
     public ICollection<UserList> Lists { get; set; } = new List<UserList>();
     public ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
+    
+    [NotMapped]
+    public string? DisplayTitle
+    {
+        get
+        {
+            var primaryTitle = Titles.OrderBy(t => t.Ordering).FirstOrDefault();
+            if (primaryTitle != null)
+            {
+                return primaryTitle.Title1;
+            }
+
+            return null;
+        }
+    }
 }
