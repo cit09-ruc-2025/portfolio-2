@@ -29,6 +29,7 @@ namespace DataServiceLayer
         public void CreateUser(User user)
         {
             var db = new MediaDbContext(_connectionString);
+            user.Id = Guid.NewGuid();
             db.Users.Add(user);
             db.SaveChanges();
         }

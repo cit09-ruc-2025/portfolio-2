@@ -1,12 +1,16 @@
 ﻿using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using WebServiceLayer.DTOs.Requests;
 using WebServiceLayer.DTOs.Responses;
 
 namespace WebServiceLayer.Controllers
 {
+    [Authorize(Policy = "SameUser")]
     [Route("api/user/{userId:guid}/watch-history")]
     [ApiController]
     public class WatchHistoryController : ControllerBase
@@ -22,6 +26,7 @@ namespace WebServiceLayer.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet(Name = nameof(Get))]
         public ActionResult Get(Guid userId)
         {
@@ -32,10 +37,11 @@ namespace WebServiceLayer.Controllers
             return Ok(_mapper.Map<List<WatchHistoryDTO>>(watched));
         }
 
+        [Authorize]
         [HttpPost]
-        public ActionResult Post(Guid userId, [FromBody] string mediaId)
+        public ActionResult Post(Guid userId, [FromBody] AddToWatchHistoryRequest request)
         {
-            var success = _mediaService.AddToWatched(mediaId, userId);
+            var success = _mediaService.AddToWatched(request.MediaId, userId);
             if (!success) return BadRequest("Failed while adding to WatchHistory");
             var location = GetUrl(nameof(Get), new { userId });
             return Created(location!, null);
