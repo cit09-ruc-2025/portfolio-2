@@ -13,10 +13,22 @@ public partial class MediaDbContext : DbContext
         _connectionString = connectionString;
     }
 
-    // public MediaDbContext(DbContextOptions<MediaDbContext> options)
-    //     : base(options)
-    // {
-    // }
+    // For EF migrations
+    public MediaDbContext() { }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Logging and sensitive data for debugging
+        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
+        optionsBuilder.EnableSensitiveDataLogging();
+
+        // Use the provided connection string
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = _connectionString ?? "Host=localhost;Database=project_portfolio;Username=postgres;Password=neva0518";
+            optionsBuilder.UseNpgsql(connectionString);
+        }
+    }
 
     public DbSet<DvdRelease> DvdReleases { get; set; }
 
@@ -58,12 +70,12 @@ public partial class MediaDbContext : DbContext
 
     public DbSet<WatchHistory> WatchHistories { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
-        optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.UseNpgsql(_connectionString);
-    }
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
+    //     optionsBuilder.EnableSensitiveDataLogging();
+    //     optionsBuilder.UseNpgsql(_connectionString);
+    // }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
