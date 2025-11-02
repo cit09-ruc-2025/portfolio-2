@@ -1,7 +1,7 @@
 ﻿using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 
-namespace DataServiceLayer
+namespace DataServiceLayer.Services
 {
     public class UserService : IUserService
     {
@@ -33,6 +33,14 @@ namespace DataServiceLayer
             db.Users.Add(user);
             db.SaveChanges();
         }
+
+        public User? GetById(Guid id)
+        {
+            var db = new MediaDbContext(_connectionString);
+            var user = db.Users.FirstOrDefault(x => x.Id == id);
+            return user;
+        }
+
 
     }
 }

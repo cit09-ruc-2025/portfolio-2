@@ -11,5 +11,7 @@ namespace DataServiceLayer.Interfaces
         User? GetUserByEmail(string email);
         User? GetUserByUsername(string username);
         void CreateUser(User user);
+        public User? GetById(Guid id);
+
     }
 }
