@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataServiceLayer.Dtos;
+using DataServiceLayer.DTOs;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataServiceLayer
+namespace DataServiceLayer.Services
 {
     public class ReviewService : IReviewService
     {
@@ -131,6 +133,48 @@ namespace DataServiceLayer
                 throw;
             }
 
+        }
+
+        public PaginatedResult<ReviewWithRating> GetByMediaId(string mediaId, int page, int pageSize)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            var ratingsWithReviews = (
+                from ratings in db.Ratings.Include(r => r.User)
+                join reviews in db.Reviews
+                on new { ratings.MediaId, ratings.UserId }
+                equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
+                from reviews in ratingWithReview.DefaultIfEmpty()
+                where ratings.MediaId == mediaId
+                select new ReviewWithRating
+                {
+                    MediaId = ratings.MediaId,
+                    UserId = ratings.User.Id,
+                    Username = ratings.User.Username ?? "",
+                    UserProfile = ratings.User.ProfileUrl ?? "",
+                    Rating = ratings.Rating1 ?? 0,
+                    Review = reviews.ReviewText,
+                    CreatedAt = reviews != null ? reviews.CreatedAt : ratings.CreatedAt
+                }
+            );
+
+            var ratingsWithReviewsPaginated = ratingsWithReviews
+            .OrderBy(r => r.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+            return new PaginatedResult<ReviewWithRating>
+            {
+                Items = ratingsWithReviewsPaginated,
+                Total = ratingsWithReviews.Count()
+            };
+        }
+
+        public int GetRatingsCount()
+        {
+            var db = new MediaDbContext(_connectionString);
+            return db.Ratings.Count();
         }
 
     }

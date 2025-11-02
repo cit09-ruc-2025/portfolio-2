@@ -1,12 +1,11 @@
-using DataServiceLayer;
-using DataServiceLayer.Interfaces;
+using System.Text;
 using DataServiceLayer.Services;
+using DataServiceLayer.Interfaces;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
-using System.Text;
 using WebServiceLayer.Auth_Middleware;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -34,7 +33,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 
 builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
-builder.Services.AddSingleton<IPlaylistService, PlaylistService>();
 builder.Services.AddSingleton<IReviewService>(new ReviewService(connectionString));
 builder.Services.AddSingleton<IMediaService>(new MediaService(connectionString));
 

@@ -1,7 +1,7 @@
 ﻿using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 
-namespace DataServiceLayer
+namespace DataServiceLayer.Services
 {
     public class UserService : IUserService
     {
