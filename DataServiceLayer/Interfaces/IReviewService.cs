@@ -14,7 +14,6 @@ namespace DataServiceLayer.Interfaces
         public Rating? GetRatingById(string mediaId, Guid userId);
         public Task DeleteReview(Rating rating);
         public PaginatedResult<ReviewWithRating> GetByMediaId(string mediaId, int page, int pageSize);
-        public int GetRatingsCount();
-
+        public PaginatedResult<ReviewWithRating> GetByUserId(Guid userId, int page, int pageSize);
     }
 }

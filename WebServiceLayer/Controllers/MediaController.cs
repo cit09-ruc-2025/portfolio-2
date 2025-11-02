@@ -18,16 +18,13 @@ namespace WebServiceLayer.Controllers
     {
         private readonly IMediaService _mediaService;
         private readonly IReviewService _reviewService;
-
         protected readonly IMapper _mapper;
-
 
         public MediaController(IMediaService mediaService, IReviewService reviewService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
             _mapper = mapper;
-
         }
 
         [HttpGet("{mediaId}/reviews", Name = nameof(ReviewList))]
@@ -41,7 +38,7 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        mediaId = "MEDIA_NOT_FOUND"
+                        media = "MEDIA_NOT_FOUND"
                     }
                 });
             }

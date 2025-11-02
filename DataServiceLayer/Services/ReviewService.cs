@@ -171,11 +171,40 @@ namespace DataServiceLayer.Services
             };
         }
 
-        public int GetRatingsCount()
+        public PaginatedResult<ReviewWithRating> GetByUserId(Guid userId, int page, int pageSize)
         {
             var db = new MediaDbContext(_connectionString);
-            return db.Ratings.Count();
-        }
 
+            var ratingsWithReviews = (
+                from ratings in db.Ratings.Include(r => r.User)
+                join reviews in db.Reviews
+                on new { ratings.MediaId, ratings.UserId }
+                equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
+                from reviews in ratingWithReview.DefaultIfEmpty()
+                where ratings.UserId == userId
+                select new ReviewWithRating
+                {
+                    MediaId = ratings.MediaId,
+                    UserId = ratings.User.Id,
+                    Username = ratings.User.Username ?? "",
+                    UserProfile = ratings.User.ProfileUrl ?? "",
+                    Rating = ratings.Rating1 ?? 0,
+                    Review = reviews.ReviewText,
+                    CreatedAt = reviews != null ? reviews.CreatedAt : ratings.CreatedAt
+                }
+            );
+
+            var ratingsWithReviewsPaginated = ratingsWithReviews
+            .OrderBy(r => r.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+            return new PaginatedResult<ReviewWithRating>
+            {
+                Items = ratingsWithReviewsPaginated,
+                Total = ratingsWithReviews.Count()
+            };
+        }
     }
 }

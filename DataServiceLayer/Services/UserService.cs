@@ -34,5 +34,13 @@ namespace DataServiceLayer.Services
             db.SaveChanges();
         }
 
+        public User? GetById(Guid id)
+        {
+            var db = new MediaDbContext(_connectionString);
+            var user = db.Users.FirstOrDefault(x => x.Id == id);
+            return user;
+        }
+
+
     }
 }

@@ -53,7 +53,7 @@ namespace WebServiceLayer.Controllers
                 });
             }
 
-            var userId = Guid.Parse(User.FindFirst("id")?.Value);
+            var userId = Guid.Parse(User.FindFirst("id")!.Value);
 
             var newReview = new ReviewParam
             {
@@ -95,7 +95,7 @@ namespace WebServiceLayer.Controllers
                 });
             }
 
-            var userId = Guid.Parse(User.FindFirst("id")?.Value);
+            var userId = Guid.Parse(User.FindFirst("id")!.Value);
 
             var existingRating = _reviewService.GetRatingById(mediaId, userId);
 
