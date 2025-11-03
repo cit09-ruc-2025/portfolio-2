@@ -17,7 +17,7 @@ namespace WebServiceLayer.Controllers
             _generator = generator;
         }
 
-        protected object CreatePaging<T>(string endpointName, IEnumerable<T> items, int numberOfItems, QueryParams queryParams)
+        protected PaginationResult<T> CreatePaging<T>(string endpointName, IEnumerable<T> items, int numberOfItems, QueryParams queryParams)
         {
             var numberOfPages = (int)Math.Ceiling((double)numberOfItems / queryParams.PageSize);
 
@@ -33,17 +33,15 @@ namespace WebServiceLayer.Controllers
             var cur = GetUrl(endpointName, new { queryParams.Page, queryParams.PageSize });
             var last = GetUrl(endpointName, new { page = numberOfPages, queryParams.PageSize });
 
-            return new
-            {
-                First = first,
-                Prev = prev,
-                Next = next,
-                Last = last,
-                Current = cur,
-                NumberOfPages = numberOfPages,
-                NumberOfIems = numberOfItems,
-                Items = items
-            };
+            return new PaginationResult<T>(
+                first,
+                prev,
+                next,
+                last,
+                cur,
+                numberOfPages,
+                numberOfItems,
+                items);
         }
 
         protected string? GetUrl(string endpointName, object values)
@@ -57,5 +55,15 @@ namespace WebServiceLayer.Controllers
 
         }
 
+        public record PaginationResult<T>(
+            string? First,
+            string? Prev,
+            string? Next,
+            string? Last,
+            string? Current,
+            int NumberOfPages,
+            int NumberOfItems,
+            IEnumerable<T> Items
+        );
     }
 }

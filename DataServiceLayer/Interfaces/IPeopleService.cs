@@ -10,5 +10,6 @@ namespace DataServiceLayer.Interfaces
     public interface IPeopleService
     {
         Person? GetPersonById(string peopleId);
+        (List<MediaPerson> MediaPeople, int TotalCount) GetPeopleForMedia(string mediaId, int pageNumber, int pageSize);
     }
 }
