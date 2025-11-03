@@ -15,12 +15,18 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public List<Media> GetMediaByGenre(string genreName)
+        public List<Media> GetMediaByGenre(string genreName, int pageNumber = 0, int pageSize = 10)
         {
+            if (pageNumber < 0) pageNumber = 0; // page 0 is the first page
+            if (pageSize < 1) pageSize = 10;
+
             return _db.Genres
                       .Where(g => g.Name == genreName)
                       .SelectMany(g => g.Media)
+                      .Skip(pageNumber * pageSize) // 0-based page
+                      .Take(pageSize)
                       .ToList();
         }
+
     }
 }

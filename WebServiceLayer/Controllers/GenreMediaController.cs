@@ -17,14 +17,12 @@ namespace WebServicesLayer.Controllers
         }
 
         [HttpGet("{genreName}")]
-        public IActionResult GetMediaByGenre(string genreName)
+        public IActionResult GetMediaByGenre(string genreName, int page = 0, int pageSize = 10)
         {
-            var mediaList = _genreMediaService.GetMediaByGenre(genreName);
-
+            var mediaList = _genreMediaService.GetMediaByGenre(genreName, page, pageSize);
             if (mediaList == null || !mediaList.Any())
                 return NotFound($"No media found for genre: {genreName}");
 
-            // Map to DTO
             var result = mediaList.Select(m => new GetMediaByGenreRequest
             {
                 MediaId = m.Id,
