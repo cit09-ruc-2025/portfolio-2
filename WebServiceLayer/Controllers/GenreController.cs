@@ -15,9 +15,9 @@ public class GenreController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetGenres()
+    public IActionResult GetGenres([FromQuery] int pageNumber, [FromQuery] int pageSize)
     {
-        var genres = _genreService.GetAllGenres();
+        var genres = _genreService.GetAllGenres(pageNumber, pageSize);
         return Ok(genres);
     }
     

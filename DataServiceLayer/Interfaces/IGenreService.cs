@@ -4,5 +4,5 @@ namespace DataServiceLayer.Interfaces;
 
 public interface IGenreService
 {
-    IEnumerable<Genre> GetAllGenres();
+    IEnumerable<Genre> GetAllGenres(int pageNumber, int pageSize);
 }

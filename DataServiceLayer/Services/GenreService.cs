@@ -1,7 +1,8 @@
 ﻿using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
+using DataServiceLayer.Helpers;
 
-namespace DataServiceLayer
+namespace DataServiceLayer.Services
 {
     public class GenreService : IGenreService
     {
@@ -12,10 +13,10 @@ namespace DataServiceLayer
             _connectionString = connectionString;
         }
 
-        public IEnumerable<Genre> GetAllGenres()
+        public IEnumerable<Genre> GetAllGenres(int pageNumber, int pageSize)
         {
             var db = new MediaDbContext(_connectionString);
-            return db.Genres.ToList();
+            return db.Genres.ApplyPagination(pageNumber, pageSize).ToList();
         }
 
     }
