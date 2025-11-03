@@ -7,6 +7,6 @@ public class PlaylistItem
     public string MediaId { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
 
-    public Playlist Playlist { get; set; } = null!;
+    public List Playlist { get; set; } = null!;
     public Media Media { get; set; } = null!;
 }

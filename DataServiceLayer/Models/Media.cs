@@ -59,9 +59,7 @@ public partial class Media
     public ICollection<WatchHistory> WatchHistories { get; set; } = new List<WatchHistory>();
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
-
-    public ICollection<UserList> Lists { get; set; } = new List<UserList>();
-    public ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
+    public ICollection<MediaListItem> Lists { get; set; } = new List<MediaListItem>();
     
     [NotMapped]
     public string? DisplayTitle

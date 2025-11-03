@@ -16,9 +16,9 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public Playlist CreatePlaylist(Guid userID, string title, string? description)
+        public List CreatePlaylist(Guid userID, string title, string? description)
         {
-            var playlist = new Playlist
+            var playlist = new List
             {
                 Id = Guid.NewGuid(),
                 UserId = userID,
@@ -81,14 +81,14 @@ namespace DataServiceLayer.Services
             return false;
         }
 
-        public List<Playlist> GetPlaylistsByUserId(Guid userId)
+        public List<List> GetPlaylistsByUserId(Guid userId)
         {
             return _db.Playlists
             .Where(p => p.UserId == userId)
             .ToList();
         }
 
-        public Playlist? GetPlaylistById(Guid playlistId)
+        public List? GetPlaylistById(Guid playlistId)
         {
             return _db.Playlists
             .FirstOrDefault(p => p.Id == playlistId);

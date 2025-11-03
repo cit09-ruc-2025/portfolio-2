@@ -40,15 +40,11 @@ public partial class MediaDbContext : DbContext
 
     public DbSet<Genre> Genres { get; set; }
 
-    public DbSet<UserList> Lists { get; set; }
-
     public DbSet<MediaLanguage> MediaLanguages { get; set; }
 
     public DbSet<MediaPerson> MediaPeople { get; set; }
 
     public DbSet<Media> Media { get; set; }
-
-    // public DbSet<MediaGenre> MediaGenres { get; set; }
 
     public DbSet<Person> People { get; set; }
 
@@ -67,8 +63,9 @@ public partial class MediaDbContext : DbContext
     public DbSet<TitleAttribute> TitleAttributes { get; set; }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<Playlist> Playlists { get; set; }
-    public DbSet<PlaylistItem> PlaylistItems { get; set; }
+    public DbSet<List> Lists { get; set; }
+    public DbSet<MediaListItem> MediaListItems { get; set; }
+    public DbSet<PeopleListItem> PeopleListItems { get; set; }
 
     public DbSet<WatchHistory> WatchHistories { get; set; }
 
@@ -197,195 +194,6 @@ public partial class MediaDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("name");
         });
-
-        modelBuilder.Entity<UserList>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("lists_pkey");
-
-            entity.ToTable("lists");
-
-            entity.HasIndex(e => e.Title, "idx_lists_title");
-
-            entity.HasIndex(e => e.UserId, "idx_lists_user_id");
-
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.IsPublic)
-                .HasDefaultValue(false)
-                .HasColumnName("is_public");
-            entity.Property(e => e.Title)
-                .HasMaxLength(255)
-                .HasColumnName("title");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("updated_at");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Lists)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("lists_user_id_fkey");
-
-            entity.HasMany(d => d.Media).WithMany(p => p.Lists)
-                .UsingEntity<Dictionary<string, object>>(
-                    "MediaListsRel",
-                    r => r.HasOne<Media>().WithMany()
-                        .HasForeignKey("MediaId")
-                        .HasConstraintName("media_lists_rel_media_id_fkey"),
-                    l => l.HasOne<UserList>().WithMany()
-                        .HasForeignKey("ListId")
-                        .HasConstraintName("media_lists_rel_list_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("ListId", "MediaId").HasName("media_lists_rel_pkey");
-                        j.ToTable("media_lists_rel");
-                        j.IndexerProperty<Guid>("ListId").HasColumnName("list_id");
-                        j.IndexerProperty<string>("MediaId")
-                            .HasMaxLength(50)
-                            .HasColumnName("media_id");
-                    });
-
-            entity.HasMany(d => d.People).WithMany(p => p.Lists)
-                .UsingEntity<Dictionary<string, object>>(
-                    "PeopleListsRel",
-                    r => r.HasOne<Person>().WithMany()
-                        .HasForeignKey("PeopleId")
-                        .HasConstraintName("people_lists_rel_people_id_fkey"),
-                    l => l.HasOne<UserList>().WithMany()
-                        .HasForeignKey("ListId")
-                        .HasConstraintName("people_lists_rel_list_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("ListId", "PeopleId").HasName("people_lists_rel_pkey");
-                        j.ToTable("people_lists_rel");
-                        j.IndexerProperty<Guid>("ListId").HasColumnName("list_id");
-                        j.IndexerProperty<string>("PeopleId")
-                            .HasMaxLength(50)
-                            .HasColumnName("people_id");
-                    });
-        });
-
-        modelBuilder.Entity<MediaLanguage>(entity =>
-        {
-            entity.HasKey(e => new { e.MediaId, e.LanguageName }).HasName("media_languages_pkey");
-
-            entity.ToTable("media_languages");
-
-            entity.Property(e => e.MediaId)
-                .HasMaxLength(50)
-                .HasColumnName("media_id");
-            entity.Property(e => e.LanguageName)
-                .HasMaxLength(50)
-                .HasColumnName("language_name");
-
-            entity.HasOne(d => d.Media).WithMany(p => p.MediaLanguages)
-                .HasForeignKey(d => d.MediaId)
-                .HasConstraintName("media_languages_media_id_fkey");
-        });
-
-        modelBuilder.Entity<MediaPerson>(entity =>
-        {
-            entity.HasKey(e => new { e.MediaId, e.PeopleId, e.RoleId }).HasName("media_people_pkey");
-
-            entity.ToTable("media_people");
-
-            entity.HasIndex(e => e.PeopleId, "idx_media_people_people_id");
-
-            entity.Property(e => e.MediaId)
-                .HasMaxLength(50)
-                .HasColumnName("media_id");
-            entity.Property(e => e.PeopleId)
-                .HasMaxLength(50)
-                .HasColumnName("people_id");
-            entity.Property(e => e.RoleId).HasColumnName("role_id");
-            entity.Property(e => e.Characters).HasColumnName("characters");
-            entity.Property(e => e.JobNote)
-                .HasMaxLength(255)
-                .HasColumnName("job_note");
-            entity.Property(e => e.KnownFor).HasColumnName("known_for");
-            entity.Property(e => e.Ordering).HasColumnName("ordering");
-
-            entity.HasOne(d => d.Media).WithMany(p => p.MediaPeople)
-                .HasForeignKey(d => d.MediaId)
-                .HasConstraintName("media_people_media_id_fkey");
-
-            entity.HasOne(d => d.People).WithMany(p => p.MediaPeople)
-                .HasForeignKey(d => d.PeopleId)
-                .HasConstraintName("media_people_people_id_fkey");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.MediaPeople)
-                .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("media_people_role_id_fkey");
-        });
-
-        modelBuilder.Entity<Media>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("media_pkey");
-
-            entity.ToTable("media");
-
-            entity.Property(e => e.Id)
-                .HasMaxLength(50)
-                .HasColumnName("id");
-            entity.Property(e => e.AgeRating)
-                .HasMaxLength(50)
-                .HasColumnName("age_rating");
-            entity.Property(e => e.AverageRating)
-                .HasPrecision(3, 1)
-                .HasColumnName("average_rating");
-            entity.Property(e => e.Awards).HasColumnName("awards");
-            entity.Property(e => e.BoxOffice)
-                .HasMaxLength(100)
-                .HasColumnName("box_office");
-            entity.Property(e => e.EndYear).HasColumnName("end_year");
-            entity.Property(e => e.ImdbAverageRating)
-                .HasPrecision(3, 1)
-                .HasColumnName("imdb_average_rating");
-            entity.Property(e => e.ImdbNumberOfVotes).HasColumnName("imdb_number_of_votes");
-            entity.Property(e => e.Metascore)
-                .HasMaxLength(100)
-                .HasColumnName("metascore");
-            entity.Property(e => e.Plot).HasColumnName("plot");
-            entity.Property(e => e.Poster)
-                .HasMaxLength(255)
-                .HasColumnName("poster");
-            entity.Property(e => e.Production)
-                .HasMaxLength(255)
-                .HasColumnName("production");
-            entity.Property(e => e.ReleaseYear).HasColumnName("release_year");
-            entity.Property(e => e.RuntimeMinutes).HasColumnName("runtime_minutes");
-            entity.Property(e => e.WebsiteUrl)
-                .HasMaxLength(255)
-                .HasColumnName("website_url");
-
-            entity.HasMany(d => d.Genres).WithMany(p => p.Media)
-                .UsingEntity<Dictionary<string, object>>(
-                    "MediaGenre",
-                    r => r.HasOne<Genre>().WithMany()
-                        .HasForeignKey("GenreId")
-                        .HasConstraintName("media_genres_genre_id_fkey"),
-                    l => l.HasOne<Media>().WithMany()
-                        .HasForeignKey("MediaId")
-                        .HasConstraintName("media_genres_media_id_fkey"),
-                    j =>
-                    {
-                        j.HasKey("MediaId", "GenreId").HasName("media_genres_pkey");
-                        j.ToTable("media_genres");
-                        j.IndexerProperty<string>("MediaId")
-                            .HasMaxLength(50)
-                            .HasColumnName("media_id");
-                        j.IndexerProperty<Guid>("GenreId").HasColumnName("genre_id");
-                    });
-        });
-
 
         modelBuilder.Entity<Person>(entity =>
         {
@@ -662,80 +470,96 @@ public partial class MediaDbContext : DbContext
                 .HasConstraintName("watch_history_user_id_fkey");
         });
 
-        modelBuilder.Entity<Playlist>(entity =>
-{
-    entity.ToTable("playlists");
-    entity.HasKey(p => p.Id).HasName("playlists_pkey");
-
-    entity.Property(p => p.Id)
-        .HasDefaultValueSql("gen_random_uuid()")
-        .HasColumnName("id");
-
-    entity.Property(p => p.Title)
-        .HasMaxLength(100)
-        .IsRequired()
-        .HasColumnName("title");
-
-    entity.Property(p => p.Description)
-        .HasMaxLength(500)
-        .HasColumnName("description");
-
-    entity.Property(p => p.UserId)
-        .IsRequired()
-        .HasColumnName("user_id");
-
-    entity.Property(p => p.CreatedAt)
-        .HasDefaultValueSql("CURRENT_TIMESTAMP")
-        .HasColumnType("timestamp without time zone")
-        .HasColumnName("created_at");
-
-    entity.Property(p => p.UpdatedAt)
-        .HasDefaultValueSql("CURRENT_TIMESTAMP")
-        .HasColumnType("timestamp without time zone")
-        .HasColumnName("updated_at");
-
-    // Relationship: Playlist belongs to a User
-    entity.HasOne(p => p.User)
-        .WithMany(u => u.Playlists)
-        .HasForeignKey(p => p.UserId)
-        .OnDelete(DeleteBehavior.Cascade)
-        .HasConstraintName("playlists_user_id_fkey");
-});
-
-        modelBuilder.Entity<PlaylistItem>(entity =>
+        modelBuilder.Entity<List>(entity =>
         {
-            entity.ToTable("playlist_items");
-            entity.HasKey(pi => pi.Id).HasName("playlist_items_pkey");
+            entity.ToTable("lists");
+            entity.HasKey(p => p.Id).HasName("lists_pkey");
 
-            entity.Property(pi => pi.Id)
+            entity.Property(p => p.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
 
-            entity.Property(pi => pi.PlaylistId)
+            entity.Property(p => p.Title)
+                .HasMaxLength(255)
                 .IsRequired()
-                .HasColumnName("playlist_id");
+                .HasColumnName("title");
 
-            entity.Property(pi => pi.MediaId)
-                .HasMaxLength(50)
+            entity.Property(p => p.Description)
+                .HasMaxLength(500)
+                .HasColumnName("description");
+
+            entity.Property(p => p.UserId)
                 .IsRequired()
-                .HasColumnName("media_id");
+                .HasColumnName("user_id");
 
-            entity.Property(pi => pi.CreatedAt)
+            entity.Property(p => p.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
 
-            // Relationships
-            entity.HasOne(pi => pi.Playlist)
-                .WithMany(p => p.PlaylistItems)
-                .HasForeignKey(pi => pi.PlaylistId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("playlist_items_playlist_id_fkey");
+            entity.Property(p => p.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("updated_at");
 
-            entity.HasOne(pi => pi.Media)
-                .WithMany(p => p.PlaylistItems)
-                .HasForeignKey(pi => pi.MediaId)
-                .HasConstraintName("playlist_items_media_id_fkey");
+            // Relationship: List belongs to a User
+            entity.HasOne(p => p.User)
+                .WithMany(u => u.Lists)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("lists_user_id_fkey");
+
+            // Media many-to-many
+            entity.HasMany(p => p.MediaListItems)
+                .WithOne(mli => mli.List)
+                .HasForeignKey(mli => mli.ListId)
+                .HasConstraintName("media_lists_rel_list_id_fkey");
+
+            // People many-to-many
+            entity.HasMany(p => p.PeopleListItems)
+                .WithOne(pli => pli.List)
+                .HasForeignKey(pli => pli.ListId)
+                .HasConstraintName("people_lists_rel_list_id_fkey");
+        });
+
+        // MediaListItem 
+        modelBuilder.Entity<MediaListItem>(entity =>
+        {
+            entity.ToTable("media_lists_rel");
+            entity.HasKey(ml => new { ml.ListId, ml.MediaId }).HasName("media_lists_rel_pkey");
+
+            entity.Property(ml => ml.ListId).HasColumnName("list_id");
+            entity.Property(ml => ml.MediaId).HasMaxLength(50).HasColumnName("media_id");
+
+            entity.HasOne(ml => ml.List)
+                .WithMany(l => l.MediaListItems)
+                .HasForeignKey(ml => ml.ListId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ml => ml.Media)
+                .WithMany(m => m.Lists)
+                .HasForeignKey(ml => ml.MediaId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // PeopleListItem 
+        modelBuilder.Entity<PeopleListItem>(entity =>
+        {
+            entity.ToTable("people_lists_rel");
+            entity.HasKey(pl => new { pl.ListId, pl.PeopleId }).HasName("people_lists_rel_pkey");
+
+            entity.Property(pl => pl.ListId).HasColumnName("list_id");
+            entity.Property(pl => pl.PeopleId).HasMaxLength(50).HasColumnName("people_id");
+
+            entity.HasOne(pl => pl.List)
+                .WithMany(l => l.PeopleListItems)
+                .HasForeignKey(pl => pl.ListId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(pl => pl.People)
+                .WithMany(p => p.Lists)
+                .HasForeignKey(pl => pl.PeopleId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

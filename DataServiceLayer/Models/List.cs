@@ -1,5 +1,5 @@
 namespace DataServiceLayer.Models;
-public class Playlist
+public class List
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -13,6 +13,6 @@ public class Playlist
 
     public DateTime? UpdatedAt { get; set; }
     public User User { get; set; } = null!;
-
-    public ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
+    public ICollection<MediaListItem> MediaListItems { get; set; } = new List<MediaListItem>();
+    public ICollection<PeopleListItem> PeopleListItems { get; set; } = new List<PeopleListItem>();
 }
