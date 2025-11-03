@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace WebServiceLayer.Models
 {
-    public class GetMediaByGenre
+    public class GetMediaByGenreRequest
     {
-        public string Id { get; set; } = null!;
+        public string MediaId { get; set; } = null!;
         public string? Title { get; set; }
         public int? ReleaseYear { get; set; }
         public string? Poster { get; set; }

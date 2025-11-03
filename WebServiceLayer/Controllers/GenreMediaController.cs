@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using DataServiceLayer.Interfaces;
-using DataServiceLayer.Models;
-using System;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using WebServiceLayer.Models;
+using System.Linq;
 
-namespace WebServiceLayer.Controllers
+namespace WebServicesLayer.Controllers
 {
     [ApiController]
     [Route("api/genre")]
@@ -19,14 +17,24 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet("{genreName}")]
-        public IActionResult GetMediaByGenre([FromRoute] string genreName)
+        public IActionResult GetMediaByGenre(string genreName)
         {
-            var media = _genreMediaService.GetMediaByGenre(genreName);
+            var mediaList = _genreMediaService.GetMediaByGenre(genreName);
 
-            if (!media.Any())
+            if (mediaList == null || !mediaList.Any())
                 return NotFound($"No media found for genre: {genreName}");
 
-            return Ok(media);
+            // Map to DTO
+            var result = mediaList.Select(m => new GetMediaByGenreRequest
+            {
+                MediaId = m.Id,
+                Title = m.Titles.FirstOrDefault()?.Title1,
+                ReleaseYear = m.ReleaseYear,
+                Poster = m.Poster,
+                AverageRating = m.AverageRating,
+            });
+
+            return Ok(result);
         }
     }
 }
