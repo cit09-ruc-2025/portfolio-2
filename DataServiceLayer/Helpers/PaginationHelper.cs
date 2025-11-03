@@ -14,5 +14,13 @@ namespace DataServiceLayer.Helpers
             if (pageSize < 1) pageSize = 10;
             return query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
         }
+
+        public static (List<T> Items, int TotalCount) GetPaginatedResult<T>(this IQueryable<T> baseQuery, int pageNumber, int pageSize)
+        {
+            var totalCount = baseQuery.Count();
+
+            var items = baseQuery.ApplyPagination(pageNumber, pageSize).ToList();
+            return (items, totalCount);
+        }
     }
 }
