@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using System;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
@@ -19,17 +18,17 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult CreatePlaylist([FromBody] PlaylistCreateRequest request)
+        public IActionResult CreatePlaylist([FromBody] CreatePlaylistDTO request)
         {
             var playlist = _playlistService.CreatePlaylist(request.UserId, request.Title, request.Description);
             return Ok(playlist);
         }
 
         [HttpPost("user/{userId}/{playlistId}/add")]
-        public IActionResult AddMediaToPlaylist(
+        public IActionResult AddItemToPlaylist(
             [FromRoute] Guid userId,
             [FromRoute] Guid playlistId,
-            [FromBody] AddMediaRequest request)
+            [FromBody] AddItemToPlaylistDTO request)
         {
             var playlist = _playlistService.GetPlaylistById(playlistId);
             if (playlist == null)
@@ -38,26 +37,24 @@ namespace WebServiceLayer.Controllers
             if (playlist.UserId != userId)
                 return Unauthorized(new { message = "You do not have permission" });
 
-            var result = _playlistService.AddMediaToPlaylist(playlistId, request.MediaId);
+            var result = _playlistService.AddItemToPlaylist(playlistId, request.ItemId, request.IsMedia);
             return Ok(result);
         }
 
-
         [HttpPost("user/{userId}/{playlistId}/remove")]
-        public IActionResult RemoveMediaFromPlaylist(
+        public IActionResult RemoveItemFromPlaylist(
             [FromRoute] Guid userId,
             [FromRoute] Guid playlistId,
-            [FromBody] AddMediaRequest request)
+            [FromBody] AddItemToPlaylistDTO request)
         {
             var playlist = _playlistService.GetPlaylistById(playlistId);
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
-                
-            if (playlist.UserId != userId) 
+
+            if (playlist.UserId != userId)
                 return Unauthorized(new { message = "You do not have permission" });
 
-
-            var result = _playlistService.RemoveMediaFromPlaylist(playlistId, request.MediaId);
+            var result = _playlistService.RemoveItemFromPlaylist(playlistId, request.ItemId, request.IsMedia);
             return Ok(result);
         }
 
@@ -67,7 +64,7 @@ namespace WebServiceLayer.Controllers
             [FromRoute] Guid playlistId)
         {
             var playlist = _playlistService.GetPlaylistById(playlistId);
-            if (playlist == null) 
+            if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
             if (playlist.UserId != userId)
@@ -78,10 +75,20 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public IActionResult GetPlaylistsByUserId(Guid userId)
+        public IActionResult GetPlaylistsByUserId([FromRoute] Guid userId)
         {
             var playlists = _playlistService.GetPlaylistsByUserId(userId);
             return Ok(playlists);
+        }
+
+        [HttpGet("{playlistId}")]
+        public IActionResult GetPlaylistById([FromRoute] Guid playlistId)
+        {
+            var playlist = _playlistService.GetPlaylistById(playlistId);
+            if (playlist == null)
+                return NotFound(new { message = "Playlist not found" });
+
+            return Ok(playlist);
         }
     }
 }

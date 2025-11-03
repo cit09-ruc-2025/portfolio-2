@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace DataServiceLayer.Models;
 public class List
 {
@@ -12,6 +14,7 @@ public class List
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    [JsonIgnore] // To prevent circular reference during serialization
     public User User { get; set; } = null!;
     public ICollection<MediaListItem> MediaListItems { get; set; } = new List<MediaListItem>();
     public ICollection<PeopleListItem> PeopleListItems { get; set; } = new List<PeopleListItem>();

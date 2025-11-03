@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebServiceLayer.Models
 {
-    public class DeletePlaylistRequest
+    public class DeletePlaylistDTO
     {
         public Guid PlaylistId { get; set; }
     }

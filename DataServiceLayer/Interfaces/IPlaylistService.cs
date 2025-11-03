@@ -7,11 +7,11 @@ namespace DataServiceLayer.Interfaces
     {
 
         List CreatePlaylist(Guid userID, string title, string? description);
-        bool AddMediaToPlaylist(Guid playlistId, string mediaId);
-        bool RemoveMediaFromPlaylist(Guid playlistId, string mediaId);
-        bool DeletePlaylist(Guid playlistId);
+        bool AddItemToPlaylist(Guid listId, string itemId, bool isMedia);
+        bool RemoveItemFromPlaylist(Guid listId, string itemId, bool isMedia);
+        bool DeletePlaylist(Guid listId);
         List<List> GetPlaylistsByUserId(Guid userId);
-        List? GetPlaylistById(Guid playlistId);
+        List? GetPlaylistById(Guid listId);
 
     }
 }

@@ -179,6 +179,82 @@ public partial class MediaDbContext : DbContext
                 .HasConstraintName("favorite_people_user_id_fkey");
         });
 
+        modelBuilder.Entity<Media>(entity =>
+        {
+            entity.ToTable("media"); // Ensure lowercase to match PostgreSQL naming conventions
+
+            entity.HasKey(m => m.Id).HasName("media_pkey");
+
+            entity.Property(m => m.Id)
+                .HasMaxLength(50)
+                .HasColumnName("id")
+                .IsRequired();
+
+            entity.Property(m => m.ReleaseYear).HasColumnName("release_year");
+            entity.Property(m => m.EndYear).HasColumnName("end_year");
+            entity.Property(m => m.RuntimeMinutes).HasColumnName("runtime_minutes");
+            entity.Property(m => m.ImdbAverageRating).HasColumnName("imdb_average_rating");
+            entity.Property(m => m.ImdbNumberOfVotes).HasColumnName("imdb_number_of_votes");
+            entity.Property(m => m.Plot).HasColumnName("plot");
+            entity.Property(m => m.Awards).HasColumnName("awards");
+            entity.Property(m => m.AgeRating).HasColumnName("age_rating");
+            entity.Property(m => m.Poster).HasColumnName("poster");
+            entity.Property(m => m.Production).HasColumnName("production");
+            entity.Property(m => m.BoxOffice).HasColumnName("box_office");
+            entity.Property(m => m.WebsiteUrl).HasColumnName("website_url");
+            entity.Property(m => m.Metascore).HasColumnName("metascore");
+            entity.Property(m => m.AverageRating).HasColumnName("average_rating");
+
+            // Navigation relationships
+            entity.HasMany(m => m.MediaPeople)
+                .WithOne(mp => mp.Media)
+                .HasForeignKey(mp => mp.MediaId);
+
+            entity.HasMany(m => m.MediaLanguages)
+                .WithOne(ml => ml.Media)
+                .HasForeignKey(ml => ml.MediaId);
+
+            entity.HasMany(m => m.Reviews)
+                .WithOne(r => r.Media)
+                .HasForeignKey(r => r.MediaId);
+
+            entity.HasMany(m => m.Ratings)
+                .WithOne(r => r.Media)
+                .HasForeignKey(r => r.MediaId);
+
+            entity.HasMany(m => m.FavoriteMedia)
+                .WithOne(fm => fm.Media)
+                .HasForeignKey(fm => fm.MediaId);
+
+            entity.HasMany(m => m.RecentlyVieweds)
+                .WithOne(rv => rv.Media)
+                .HasForeignKey(rv => rv.MediaId);
+
+            entity.HasMany(m => m.Titles)
+                .WithOne(t => t.Media)
+                .HasForeignKey(t => t.MediaId);
+
+            entity.HasMany(m => m.WatchHistories)
+                .WithOne(wh => wh.Media)
+                .HasForeignKey(wh => wh.MediaId);
+
+            entity.HasMany(m => m.Lists)
+                .WithOne(mli => mli.Media)
+                .HasForeignKey(mli => mli.MediaId);
+
+            entity.HasMany(m => m.EpisodeEpisodeMedia)
+                .WithOne(e => e.EpisodeMedia)
+                .HasForeignKey(e => e.EpisodeMediaId);
+
+            entity.HasMany(m => m.EpisodeSeriesMedia)
+                .WithOne(e => e.SeriesMedia)
+                .HasForeignKey(e => e.SeriesMediaId);
+
+            entity.HasOne(m => m.DvdRelease)
+                .WithOne(d => d.Media)
+                .HasForeignKey<DvdRelease>(d => d.MediaId);
+        });
+
         modelBuilder.Entity<Genre>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("genres_pkey");
@@ -283,6 +359,45 @@ public partial class MediaDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("recently_viewed_user_id_fkey");
+        });
+
+        modelBuilder.Entity<MediaLanguage>(entity =>
+        {
+            entity.ToTable("media_languages"); 
+
+            entity.HasKey(ml => new { ml.MediaId, ml.LanguageName })
+                .HasName("media_languages_pkey");
+
+            entity.Property(ml => ml.MediaId)
+                .HasMaxLength(50)
+                .HasColumnName("media_id");
+
+            entity.Property(ml => ml.LanguageName)
+                .HasMaxLength(50)
+                .HasColumnName("language_name");
+
+            entity.HasOne(ml => ml.Media)
+                .WithMany(m => m.MediaLanguages)
+                .HasForeignKey(ml => ml.MediaId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MediaPerson>(entity =>
+        {
+            entity.ToTable("media_people");
+
+            // Composite primary key
+            entity.HasKey(mp => new { mp.MediaId, mp.PeopleId });
+
+            entity.HasOne(mp => mp.Media)
+                .WithMany(m => m.MediaPeople)
+                .HasForeignKey(mp => mp.MediaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(mp => mp.People)
+                .WithMany(p => p.MediaPeople)
+                .HasForeignKey(mp => mp.PeopleId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Review>(entity =>
@@ -561,8 +676,6 @@ public partial class MediaDbContext : DbContext
                 .HasForeignKey(pl => pl.PeopleId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
-        OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

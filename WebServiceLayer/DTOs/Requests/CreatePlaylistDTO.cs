@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebServiceLayer.Models
 {
-    public class PlaylistCreateRequest
+    public class CreatePlaylistDTO
     {
         [Required(ErrorMessage = "USERID_REQUIRED")]
         public Guid UserId { get; set; }
@@ -15,5 +15,8 @@ namespace WebServiceLayer.Models
 
         [MaxLength(500, ErrorMessage = "DESCRIPTION_MAX_LENGTH_EXCEEDED")]
         public string? Description { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
+
