@@ -8,7 +8,7 @@ namespace DataServiceLayer.Interfaces
 {
     public interface IWatchHistoryService
     {
-        List<Models.WatchHistory> GetWatchHistory(Guid userGuid, int pageNumber, int pageSize);
+        (List<Models.WatchHistory> WatchHistory, int TotalCount) GetWatchHistory(Guid userGuid, int pageNumber, int pageSize);
         bool AddToWatched(string mediaId, Guid userGuid);
         bool RemoveFromWatched(string mediaId, Guid userGuid);
     }

@@ -98,18 +98,16 @@ namespace DataServiceLayer.Services
 
         }
 
-        public List<FavoritePerson> GetFavoritePeople(Guid userId, int pageNumber, int pageSize)
+        public (List<FavoritePerson> FavoritePeople, int TotalCount) GetFavoritePeople(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            var favorites = context.FavoritePeople.Where(fp => fp.UserId == userId).ApplyPagination(pageNumber, pageSize).ToList();
-            return favorites;
+            return context.FavoritePeople.Where(fp => fp.UserId == userId).GetPaginatedResult(pageNumber, pageSize);
         }
 
-        public List<FavoriteMedia> GetFavoriteMedia(Guid userId, int pageNumber, int pageSize)
+        public (List<FavoriteMedia> FavoriteMedia, int TotalCount) GetFavoriteMedia(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            var favorites = context.FavoriteMedia.Where(fp => fp.UserId == userId).ApplyPagination(pageNumber, pageSize).ToList();
-            return favorites;
+            return context.FavoriteMedia.Where(fp => fp.UserId == userId).GetPaginatedResult(pageNumber, pageSize);
         }
     }
 }

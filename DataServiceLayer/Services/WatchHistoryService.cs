@@ -18,10 +18,12 @@ namespace DataServiceLayer.Services
             _connectionString = connectionString;
         }
         private MediaDbContext CreateContext() => new(_connectionString);
-        public List<WatchHistory> GetWatchHistory(Guid userGuid, int pageNumber, int pageSize)
+        public (List<WatchHistory> WatchHistory, int TotalCount) GetWatchHistory(Guid userGuid, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            return context.WatchHistories.Where(wh => wh.UserId == userGuid).ApplyPagination(pageNumber, pageSize).ToList();
+
+            var baseQuery = context.WatchHistories.Where(wh => wh.UserId == userGuid);
+            return baseQuery.GetPaginatedResult(pageNumber, pageSize);
         }
 
         public bool AddToWatched(string mediaId, Guid userGuid)

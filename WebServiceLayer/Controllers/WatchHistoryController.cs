@@ -7,19 +7,20 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using WebServiceLayer.DTOs.Requests;
 using WebServiceLayer.DTOs.Responses;
+using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
 {
     [Authorize(Policy = "SameUser")]
     [Route("api/user/{userId:guid}/watch-history")]
     [ApiController]
-    public class WatchHistoryController : ControllerBase
+    public class WatchHistoryController : BaseController
     {
         private readonly IWatchHistoryService _mediaService;
         private readonly LinkGenerator _linkGenerator;
         private readonly IMapper _mapper;
 
-        public WatchHistoryController(IWatchHistoryService mediaService, LinkGenerator linkGenerator, IMapper mapper)
+        public WatchHistoryController(IWatchHistoryService mediaService, LinkGenerator linkGenerator, IMapper mapper) : base(linkGenerator)
         {
             _mediaService = mediaService;
             _linkGenerator = linkGenerator;
@@ -28,13 +29,14 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(Get))]
-        public ActionResult<List<WatchHistoryDTO>> Get(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<PaginationResult<WatchHistoryDTO>> Get(Guid userId, [FromQuery] QueryParams queryParams)
         {
-            var watched = _mediaService.GetWatchHistory(userId, pageNumber, pageSize);
+            var watched = _mediaService.GetWatchHistory(userId, queryParams.Page, queryParams.PageSize);
 
-            if (watched == null || watched.Count == 0) return NoContent();
+            if (watched.TotalCount == 0) return NoContent();
+            var dto = _mapper.Map<List<WatchHistoryDTO>>(watched.WatchHistory);
 
-            return Ok(_mapper.Map<List<WatchHistoryDTO>>(watched));
+            return Ok(CreatePaging(nameof(Get), dto, watched.TotalCount, queryParams));
         }
 
         [HttpPost]
