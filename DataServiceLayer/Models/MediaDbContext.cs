@@ -48,6 +48,8 @@ public partial class MediaDbContext : DbContext
 
     public DbSet<Media> Media { get; set; }
 
+    // public DbSet<MediaGenre> MediaGenres { get; set; }
+
     public DbSet<Person> People { get; set; }
 
     public DbSet<Rating> Ratings { get; set; }
@@ -383,6 +385,7 @@ public partial class MediaDbContext : DbContext
                         j.IndexerProperty<Guid>("GenreId").HasColumnName("genre_id");
                     });
         });
+
 
         modelBuilder.Entity<Person>(entity =>
         {
