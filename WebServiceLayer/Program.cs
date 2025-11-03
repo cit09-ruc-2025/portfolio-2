@@ -35,6 +35,7 @@ var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
 builder.Services.AddSingleton<IReviewService>(new ReviewService(connectionString));
 builder.Services.AddSingleton<IMediaService>(new MediaService(connectionString));
+builder.Services.AddSingleton<IGenreService>(new GenreService(connectionString));
 
 builder.Services.AddScoped<IPlaylistService>(provider =>
     new PlaylistService(connectionString));
