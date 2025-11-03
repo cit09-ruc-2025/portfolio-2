@@ -13,10 +13,10 @@ namespace DataServiceLayer.Services
             _connectionString = connectionString;
         }
 
-        public IEnumerable<Genre> GetAllGenres(int pageNumber, int pageSize)
+        public (List<Genre> Genres, int TotalCount) GetAllGenres(int pageNumber, int pageSize)
         {
             var db = new MediaDbContext(_connectionString);
-            return db.Genres.ApplyPagination(pageNumber, pageSize).ToList();
+            return db.Genres.GetPaginatedResult(pageNumber, pageSize);
         }
 
     }

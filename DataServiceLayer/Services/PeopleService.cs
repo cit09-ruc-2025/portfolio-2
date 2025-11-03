@@ -29,12 +29,7 @@ namespace DataServiceLayer.Services
                 .Where(mp => mp.MediaId == mediaId)
                 .OrderBy(mp => mp.Ordering);
 
-            var totalCount = baseQuery.Count();
-            var mediaPeople = baseQuery
-                .ApplyPagination(pageNumber, pageSize)
-                .ToList();
-
-            return (mediaPeople, totalCount);
+            return baseQuery.GetPaginatedResult(pageNumber, pageSize);
         }
 
         public Person? GetPersonById(string peopleId)

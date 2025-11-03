@@ -5,19 +5,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebServiceLayer.DTOs.Requests;
 using WebServiceLayer.DTOs.Responses;
+using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
 {
     [Authorize(Policy = "SameUser")]
     [Route("api/user/{userId:guid}/favorite-people")]
     [ApiController]
-    public class FavoritePeopleController : ControllerBase
+    public class FavoritePeopleController : BaseController
     {
         private readonly IFavoriteService _favoriteService;
         private readonly LinkGenerator _linkGenerator;
         private readonly IMapper _mapper;
 
-        public FavoritePeopleController(IFavoriteService favoriteService, LinkGenerator linkGenerator, IMapper mapper)
+        public FavoritePeopleController(IFavoriteService favoriteService, LinkGenerator linkGenerator, IMapper mapper) : base(linkGenerator)
         {
             _favoriteService = favoriteService;
             _linkGenerator = linkGenerator;
@@ -26,13 +27,15 @@ namespace WebServiceLayer.Controllers
 
         [AllowAnonymous]
         [HttpGet(Name = nameof(GetFavoritePeople))]
-        public ActionResult<List<FavoritePeopleDTO>> GetFavoritePeople(Guid userId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<PaginationResult<FavoritePeopleDTO>> GetFavoritePeople(Guid userId, [FromQuery] QueryParams queryParams)
         {
-            var favorites = _favoriteService.GetFavoritePeople(userId, pageNumber, pageSize);
+            var favorites = _favoriteService.GetFavoritePeople(userId, queryParams.Page, queryParams.PageSize);
 
-            if (favorites == null || favorites.Count == 0) return NoContent();
+            if (favorites.TotalCount == 0) return NoContent();
 
-            return Ok(_mapper.Map<List<FavoritePeopleDTO>>(favorites));
+            var dto = _mapper.Map<List<FavoritePeopleDTO>>(favorites);
+
+            return Ok(CreatePaging(nameof(GetFavoritePeople), dto, favorites.TotalCount, queryParams));
         }
 
         [HttpPost]
