@@ -11,6 +11,8 @@ namespace DataServiceLayer.Interfaces
         public Media? GetById(string id);
 
         public Task UpdateMediaRating(string id, MediaDbContext db);
+        
+        Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize);
 
     }
 }

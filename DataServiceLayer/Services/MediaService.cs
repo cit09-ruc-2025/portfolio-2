@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataServiceLayer.Services
 {
@@ -35,5 +36,34 @@ namespace DataServiceLayer.Services
 
         }
 
+        public async Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize)
+        {
+            using var db = new MediaDbContext(_connectionString);
+            
+            var totalCount = await db.Media.CountAsync();
+            
+            var pagedMedia = await db.Media
+                .OrderBy(m => m.ReleaseYear)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            
+            var ids = pagedMedia.Select(m => m.Id).ToList();
+
+            // Loading related data in separate queries to avoid the big join
+            await db.Media
+                .Where(m => ids.Contains(m.Id))
+                .Include(m => m.Genres)
+                .Include(m => m.DvdRelease)
+                .Include(m => m.Titles)
+                .LoadAsync();
+            
+            var items = pagedMedia.Select(m => db.Media.Local.First(x => x.Id == m.Id)).ToList();
+
+            return (items, totalCount);
+        }
+
+
+        
     }
 }

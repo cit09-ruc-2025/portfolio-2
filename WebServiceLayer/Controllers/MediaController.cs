@@ -66,5 +66,28 @@ namespace WebServiceLayer.Controllers
             return model;
         }
 
+        [HttpGet(Name = nameof(GetMediaList))]
+        public async Task<IActionResult> GetMediaList([FromQuery] QueryParams queryParams)
+        {
+            var (items, total) = await _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize);
+
+            if (items.Count == 0)
+                return NoContent();
+
+            var mapped = items.Select(m => new
+            {
+                id = m.Id,
+                title = m.DisplayTitle,
+                releaseYear = m.ReleaseYear,
+                ageRating = m.AgeRating,
+                poster = m.Poster,
+                genres = m.Genres.Select(g => g.Name),
+                dvdReleaseDate = m.DvdRelease?.ReleaseDate
+            });
+
+            var result = CreatePaging(nameof(GetMediaList), mapped, total, queryParams);
+            return Ok(result);
+        }
+        
     }
 }
