@@ -11,10 +11,10 @@ namespace DataServiceLayer.Interfaces
     {
         bool FavoritePerson(Guid userId, string peopleId);
         bool UnfavoritePerson(Guid userId, string peopleId);
-        List<FavoritePerson> GetFavoritePeople(Guid userId, int pageNumber, int pageSize);
+        (List<FavoritePerson> FavoritePeople, int TotalCount) GetFavoritePeople(Guid userId, int pageNumber, int pageSize);
         bool FavoriteMedia(Guid userId, string mediaId);
         bool UnfavoriteMedia(Guid userId, string mediaId);
-        List<FavoriteMedia> GetFavoriteMedia(Guid userId, int pageNumber, int pageSize);
+        (List<FavoriteMedia> FavoriteMedia, int TotalCount) GetFavoriteMedia(Guid userId, int pageNumber, int pageSize);
 
     }
 }
