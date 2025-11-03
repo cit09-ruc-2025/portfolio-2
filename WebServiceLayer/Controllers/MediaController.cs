@@ -8,6 +8,7 @@ using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
+using WebServiceLayer.DTOs.Responses;
 using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
@@ -18,14 +19,25 @@ namespace WebServiceLayer.Controllers
     {
         private readonly IMediaService _mediaService;
         private readonly IReviewService _reviewService;
+        private readonly IPeopleService _peopleService;
         protected readonly IMapper _mapper;
 
-        public MediaController(IMediaService mediaService, IReviewService reviewService, LinkGenerator generator, IMapper mapper) : base(generator)
+        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
+            _peopleService = peopleService;
             _mapper = mapper;
         }
+
+        [HttpGet("{mediaId}", Name = nameof(GetMediaById))]
+        public IActionResult GetMediaById([FromRoute] string mediaId)
+        {
+            var media = _mediaService.GetById(mediaId);
+
+            return Ok(media);
+        }
+
 
         [HttpGet("{mediaId}/reviews", Name = nameof(ReviewList))]
         public IActionResult ReviewList([FromRoute] string mediaId, [FromQuery] QueryParams queryParams)
@@ -59,12 +71,32 @@ namespace WebServiceLayer.Controllers
             return Ok(results);
         }
 
+        [HttpGet("{mediaId}/people", Name = nameof(GetPeopleForMedia))]
+        public ActionResult<PaginationResult<MediaPeopleDTO>> GetPeopleForMedia(string mediaId, [FromQuery] QueryParams queryParams)
+        {
+            var mediaPeopleWithCount = _peopleService.GetPeopleForMedia(mediaId, queryParams.Page, queryParams.PageSize);
+
+            if (mediaPeopleWithCount.TotalCount == 0) return NoContent();
+
+            var dtos = mediaPeopleWithCount.MediaPeople.Select(mp =>
+            {
+                var dto = _mapper.Map<MediaPeopleDTO>(mp);
+
+                dto.Description = !string.IsNullOrWhiteSpace(mp.JobNote) ? mp.JobNote : mp.Characters;
+                dto.PersonName = mp.People?.Name;
+                dto.RoleName = mp.Role?.Name;
+
+                return dto;
+            }).ToList();
+
+            return Ok(CreatePaging(nameof(GetPeopleForMedia), dtos, mediaPeopleWithCount.TotalCount, queryParams));
+        }
+
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)
         {
             var model = _mapper.Map<ReviewWithRating>(rating);
             model.UserUrl = GetUrl(nameof(ReviewList), new { id = rating.UserId });
             return model;
         }
-
     }
 }

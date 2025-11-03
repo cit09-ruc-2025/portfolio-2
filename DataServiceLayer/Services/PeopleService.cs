@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using DataServiceLayer.Helpers;
 
 namespace DataServiceLayer.Services
 {
@@ -16,6 +17,24 @@ namespace DataServiceLayer.Services
         public PeopleService(string? connectionString)
         {
             _connectionString = connectionString;
+        }
+
+        public (List<MediaPerson> MediaPeople, int TotalCount) GetPeopleForMedia(string mediaId, int pageNumber, int pageSize)
+        {
+            var context = CreateContext();
+
+            var baseQuery = context.MediaPeople
+                .Include(p => p.People)
+                .Include(mp => mp.Role)
+                .Where(mp => mp.MediaId == mediaId)
+                .OrderBy(mp => mp.Ordering);
+
+            var totalCount = baseQuery.Count();
+            var mediaPeople = baseQuery
+                .ApplyPagination(pageNumber, pageSize)
+                .ToList();
+
+            return (mediaPeople, totalCount);
         }
 
         public Person? GetPersonById(string peopleId)
