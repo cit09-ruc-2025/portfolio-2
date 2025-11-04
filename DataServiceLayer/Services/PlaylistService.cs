@@ -1,9 +1,11 @@
 using DataServiceLayer.Models;
 using DataServiceLayer.Interfaces;
+using ListEntity = DataServiceLayer.Models.List;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataServiceLayer.Services
 {
@@ -97,7 +99,7 @@ namespace DataServiceLayer.Services
 
             var list = _db.Lists.FirstOrDefault(l => l.Id == listId);
             if (list != null)
-                list.UpdatedAt = DateTime.UtcNow;
+                list.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified); ;
 
             _db.SaveChanges();
             return true;
@@ -122,14 +124,12 @@ namespace DataServiceLayer.Services
         public List<List> GetPlaylistsByUserId(Guid userId)
         {
             return _db.Lists
-            .Where(p => p.UserId == userId)
-            .ToList();
-        }
-
-        public List? GetPlaylistById(Guid listId)
-        {
-            return _db.Lists
-            .FirstOrDefault(p => p.Id == listId);
+                .Where(p => p.UserId == userId)
+                .Include(p => p.MediaListItems)
+                    .ThenInclude(mi => mi.Media) 
+                .Include(p => p.PeopleListItems)
+                    .ThenInclude(pi => pi.People)
+                .ToList();
         }
 
     }

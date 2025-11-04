@@ -1,4 +1,5 @@
 using DataServiceLayer.Models;
+using ListEntity = DataServiceLayer.Models.List;
 using System;
 
 namespace DataServiceLayer.Interfaces
@@ -11,7 +12,6 @@ namespace DataServiceLayer.Interfaces
         bool RemoveItemFromPlaylist(Guid listId, string itemId, bool isMedia);
         bool DeletePlaylist(Guid listId);
         List<List> GetPlaylistsByUserId(Guid userId);
-        List? GetPlaylistById(Guid listId);
 
     }
 }

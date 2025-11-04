@@ -30,7 +30,7 @@ namespace WebServiceLayer.Controllers
             [FromRoute] Guid playlistId,
             [FromBody] AddItemToPlaylistDTO request)
         {
-            var playlist = _playlistService.GetPlaylistById(playlistId);
+            var playlist = _playlistService.GetPlaylistsByUserId(userId).FirstOrDefault(p => p.Id == playlistId);
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
@@ -47,7 +47,7 @@ namespace WebServiceLayer.Controllers
             [FromRoute] Guid playlistId,
             [FromBody] AddItemToPlaylistDTO request)
         {
-            var playlist = _playlistService.GetPlaylistById(playlistId);
+            var playlist = _playlistService.GetPlaylistsByUserId(userId).FirstOrDefault(p => p.Id == playlistId);
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
@@ -63,7 +63,7 @@ namespace WebServiceLayer.Controllers
             [FromRoute] Guid userId,
             [FromRoute] Guid playlistId)
         {
-            var playlist = _playlistService.GetPlaylistById(playlistId);
+            var playlist = _playlistService.GetPlaylistsByUserId(userId).FirstOrDefault(p => p.Id == playlistId);
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
@@ -75,20 +75,30 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public IActionResult GetPlaylistsByUserId([FromRoute] Guid userId)
+        public IActionResult GetPlaylistsByUserId(Guid userId)
         {
             var playlists = _playlistService.GetPlaylistsByUserId(userId);
-            return Ok(playlists);
+
+            var dto = playlists.Select(p => new GetPlaylistByUserIdDTO
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                Title = p.Title,
+                Description = p.Description,
+                CreatedAt = p.CreatedAt ?? DateTime.MinValue,  // handle nullable
+                UpdatedAt = p.UpdatedAt ?? DateTime.MinValue,  // handle nullable
+                MediaListItems = p.MediaListItems.Select(mi => new MediaListItemDTO
+                {
+                    MediaId = mi.MediaId
+                }).ToList(),
+                PeopleListItems = p.PeopleListItems.Select(pi => new PeopleListItemDTO
+                {
+                    PeopleId = pi.PeopleId
+                }).ToList()
+            }).ToList();
+
+            return Ok(dto);
         }
 
-        [HttpGet("{playlistId}")]
-        public IActionResult GetPlaylistById([FromRoute] Guid playlistId)
-        {
-            var playlist = _playlistService.GetPlaylistById(playlistId);
-            if (playlist == null)
-                return NotFound(new { message = "Playlist not found" });
-
-            return Ok(playlist);
-        }
     }
 }
