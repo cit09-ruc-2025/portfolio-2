@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DataServiceLayer.Dtos;
+using DataServiceLayer.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WebServiceLayer.Models;
+
+namespace WebServiceLayer.Controllers
+{
+    [ApiController]
+    [Route("api/recently-visited")]
+    public class RecentlyVisitedController : BaseController
+    {
+        private readonly IRecentlyVisited _recentlyVisitedService;
+        private readonly IMediaService _mediaService;
+        private readonly IPeopleService _peopleService;
+
+        private readonly LinkGenerator _linkGenerator;
+        public RecentlyVisitedController(IRecentlyVisited recentlyVisitedService, IMediaService mediaService, IPeopleService peopleService, LinkGenerator linkGenerator) : base(linkGenerator)
+        {
+            _recentlyVisitedService = recentlyVisitedService;
+            _mediaService = mediaService;
+            _peopleService = peopleService;
+        }
+
+        [Authorize]
+        [HttpPost]
+        public IActionResult AddToRecent([FromBody] AddToRecent recentRecord)
+        {
+            var userId = Guid.Parse(User.FindFirst("id")!.Value);
+
+            if (string.IsNullOrWhiteSpace(recentRecord?.MediaId) && string.IsNullOrWhiteSpace(recentRecord?.PeopleId))
+            {
+                return BadRequest(new { message = "PEOPLE_OR_MEDIA_REQUIRED" });
+
+            }
+
+            if (!string.IsNullOrWhiteSpace(recentRecord?.MediaId) && !string.IsNullOrWhiteSpace(recentRecord?.PeopleId))
+            {
+                return BadRequest(new { message = "ONLY_PEOPLE_OR_MEDIA" });
+            }
+
+            if (!string.IsNullOrWhiteSpace(recentRecord?.MediaId))
+            {
+                var media = _mediaService.GetById(recentRecord.MediaId);
+                if (media == null)
+                {
+                    return NotFound(new { message = "MEDIA_NOT_FOUND" });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(recentRecord?.PeopleId))
+            {
+                var people = _peopleService.GetPersonById(recentRecord.PeopleId);
+                Console.WriteLine(people);
+                if (people == null)
+                {
+                    return NotFound(new { message = "PEOPLE_NOT_FOUND" });
+                }
+            }
+
+            _recentlyVisitedService.Add(recentRecord?.MediaId, recentRecord?.PeopleId, userId);
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpGet(Name = nameof(ListRecentlyVisited))]
+        public IActionResult ListRecentlyVisited([FromBody] AddToRecent recentRecord, [FromQuery] QueryParams queryParams)
+        {
+            var userId = Guid.Parse(User.FindFirst("id")!.Value);
+
+            var recentlyVisited = _recentlyVisitedService.List(userId, queryParams.Page, queryParams.PageSize);
+
+            return Ok(CreatePaging(nameof(ListRecentlyVisited), recentlyVisited.Item1, recentlyVisited.count, queryParams));
+        }
+    }
+}

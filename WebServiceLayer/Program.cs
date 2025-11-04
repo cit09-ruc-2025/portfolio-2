@@ -67,6 +67,9 @@ builder.Services.AddScoped<IActorService>(provider =>
 builder.Services.AddScoped<ISearchHistoryService>(provider =>
     new SearchHistoryService(connectionString));
 
+builder.Services.AddScoped<IRecentlyVisited>(provider =>
+    new RecentlyVisitedService(connectionString));
+
 builder.Services.AddMapster();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
