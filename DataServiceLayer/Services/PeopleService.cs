@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using DataServiceLayer.Helpers;
+using DataServiceLayer.Dtos;
 
 namespace DataServiceLayer.Services
 {
@@ -36,6 +37,29 @@ namespace DataServiceLayer.Services
         {
             var context = CreateContext();
             return context.People.Include(p => p.MediaPeople.Where(mp => mp.KnownFor == true)).ThenInclude(mp => mp.Media).ThenInclude(m => m.Titles.Where(t => t.Ordering == 1)).FirstOrDefault(p => p.Id == peopleId);
+        }
+
+        public PaginatedResult<PeopleList> GetByName(string keyword, int page, int pageSize)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            var query = db.People
+                .Where(x => x.Name.ToLower().Contains(keyword.ToLower()));
+
+            var result = new PaginatedResult<PeopleList>
+            {
+                Total = query.Count(),
+                Items = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new PeopleList
+                {
+                    PeopleId = p.Id,
+                    Name = p.Name
+                })
+                .ToList()
+            };
+            return result;
         }
 
         private MediaDbContext CreateContext() => new(_connectionString);

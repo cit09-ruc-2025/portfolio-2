@@ -139,72 +139,72 @@ namespace DataServiceLayer.Services
         {
             var db = new MediaDbContext(_connectionString);
 
-            var ratingsWithReviews = (
-                from ratings in db.Ratings.Include(r => r.User)
-                join reviews in db.Reviews
-                on new { ratings.MediaId, ratings.UserId }
-                equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
-                from reviews in ratingWithReview.DefaultIfEmpty()
-                where ratings.MediaId == mediaId
-                select new ReviewWithRating
-                {
-                    MediaId = ratings.MediaId,
-                    UserId = ratings.User.Id,
-                    Username = ratings.User.Username ?? "",
-                    UserProfile = ratings.User.ProfileUrl ?? "",
-                    Rating = ratings.Rating1 ?? 0,
-                    Review = reviews.ReviewText,
-                    CreatedAt = reviews != null ? reviews.CreatedAt : ratings.CreatedAt
-                }
-            );
+            var query = from ratings in db.Ratings
+                        join user in db.Users on ratings.UserId equals user.Id
+                        join reviews in db.Reviews
+                        on new { ratings.MediaId, ratings.UserId }
+                        equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
+                        from reviews in ratingWithReview.DefaultIfEmpty()
+                        where ratings.MediaId == mediaId
+                        select new { ratings, reviews, user };
 
-            var ratingsWithReviewsPaginated = ratingsWithReviews
-            .OrderBy(r => r.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-            return new PaginatedResult<ReviewWithRating>
+            var result = new PaginatedResult<ReviewWithRating>
             {
-                Items = ratingsWithReviewsPaginated,
-                Total = ratingsWithReviews.Count()
+                Total = query.Count(),
+                Items = query
+                    .OrderByDescending(x => x.reviews != null ? x.reviews.CreatedAt : x.ratings.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(x => new ReviewWithRating
+                    {
+                        MediaId = x.ratings.MediaId,
+                        UserId = x.user.Id,
+                        Username = x.user.Username ?? "",
+                        UserProfile = x.user.ProfileUrl ?? "",
+                        Rating = x.ratings.Rating1 ?? 0,
+                        Review = x.reviews != null ? x.reviews.ReviewText : null,
+                        CreatedAt = x.reviews != null ? x.reviews.CreatedAt : x.ratings.CreatedAt
+                    })
+                    .ToList()
             };
+
+            return result;
         }
 
         public PaginatedResult<ReviewWithRating> GetByUserId(Guid userId, int page, int pageSize)
         {
             var db = new MediaDbContext(_connectionString);
 
-            var ratingsWithReviews = (
-                from ratings in db.Ratings.Include(r => r.User)
-                join reviews in db.Reviews
-                on new { ratings.MediaId, ratings.UserId }
-                equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
-                from reviews in ratingWithReview.DefaultIfEmpty()
-                where ratings.UserId == userId
-                select new ReviewWithRating
-                {
-                    MediaId = ratings.MediaId,
-                    UserId = ratings.User.Id,
-                    Username = ratings.User.Username ?? "",
-                    UserProfile = ratings.User.ProfileUrl ?? "",
-                    Rating = ratings.Rating1 ?? 0,
-                    Review = reviews.ReviewText,
-                    CreatedAt = reviews != null ? reviews.CreatedAt : ratings.CreatedAt
-                }
-            );
+            var query = from ratings in db.Ratings
+                        join user in db.Users on ratings.UserId equals user.Id
+                        join reviews in db.Reviews
+                        on new { ratings.MediaId, ratings.UserId }
+                        equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
+                        from reviews in ratingWithReview.DefaultIfEmpty()
+                        where ratings.UserId == userId
+                        select new { ratings, reviews, user };
 
-            var ratingsWithReviewsPaginated = ratingsWithReviews
-            .OrderBy(r => r.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-            return new PaginatedResult<ReviewWithRating>
+            var result = new PaginatedResult<ReviewWithRating>
             {
-                Items = ratingsWithReviewsPaginated,
-                Total = ratingsWithReviews.Count()
+                Total = query.Count(),
+                Items = query
+                    .OrderBy(x => x.reviews != null ? x.reviews.CreatedAt : x.ratings.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(x => new ReviewWithRating
+                    {
+                        MediaId = x.ratings.MediaId,
+                        UserId = x.user.Id,
+                        Username = x.user.Username ?? "",
+                        UserProfile = x.user.ProfileUrl ?? "",
+                        Rating = x.ratings.Rating1 ?? 0,
+                        Review = x.reviews != null ? x.reviews.ReviewText : null,
+                        CreatedAt = x.reviews != null ? x.reviews.CreatedAt : x.ratings.CreatedAt
+                    })
+                    .ToList()
             };
+
+            return result;
         }
     }
 }
