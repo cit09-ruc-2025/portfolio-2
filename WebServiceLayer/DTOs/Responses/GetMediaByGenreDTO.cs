@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebServiceLayer.Models
 {
-    public class GetMediaByGenreRequest
+    public class GetMediaByGenreDTO
     {
         public string MediaId { get; set; } = null!;
         public string? Title { get; set; }

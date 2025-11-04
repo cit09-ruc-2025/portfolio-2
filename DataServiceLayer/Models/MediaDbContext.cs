@@ -42,6 +42,8 @@ public partial class MediaDbContext : DbContext
 
     public DbSet<MediaLanguage> MediaLanguages { get; set; }
 
+    public DbSet<MediaGenre> MediaGenres { get; set; }
+
     public DbSet<MediaPerson> MediaPeople { get; set; }
 
     public DbSet<Media> Media { get; set; }
@@ -182,8 +184,7 @@ public partial class MediaDbContext : DbContext
 
         modelBuilder.Entity<Media>(entity =>
         {
-            entity.ToTable("media"); // Ensure lowercase to match PostgreSQL naming conventions
-
+            entity.ToTable("media");
             entity.HasKey(m => m.Id).HasName("media_pkey");
 
             entity.Property(m => m.Id)
@@ -272,6 +273,28 @@ public partial class MediaDbContext : DbContext
                 .HasColumnName("name");
         });
 
+        modelBuilder.Entity<MediaGenre>(entity =>
+        {
+            entity.ToTable("media_genres");
+
+            entity.HasKey(mg => new { mg.MediaId, mg.GenreId });
+
+            entity.Property(mg => mg.MediaId)
+                .HasColumnName("media_id")
+                .HasMaxLength(50);
+
+            entity.Property(mg => mg.GenreId)
+                .HasColumnName("genre_id");
+
+            entity.HasOne(mg => mg.Media)
+                .WithMany(m => m.MediaGenres)
+                .HasForeignKey(mg => mg.MediaId);
+
+            entity.HasOne(mg => mg.Genre)
+                .WithMany(g => g.MediaGenres)
+                .HasForeignKey(mg => mg.GenreId);
+        });
+
         modelBuilder.Entity<Person>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("people_pkey");
@@ -296,7 +319,7 @@ public partial class MediaDbContext : DbContext
 
         modelBuilder.Entity<CoActor>(entity =>
         {
-            entity.HasNoKey(); 
+            entity.HasNoKey();
         });
 
 

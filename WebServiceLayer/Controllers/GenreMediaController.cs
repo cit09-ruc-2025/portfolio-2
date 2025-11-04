@@ -9,21 +9,21 @@ namespace WebServicesLayer.Controllers
     [Route("api/genre")]
     public class GenreMediaController : ControllerBase
     {
-        private readonly IGenreMediaService _genreMediaService;
+        private readonly IMediaGenreService _genreMediaService;
 
-        public GenreMediaController(IGenreMediaService genreMediaService)
+        public GenreMediaController(IMediaGenreService genreMediaService)
         {
             _genreMediaService = genreMediaService;
         }
 
         [HttpGet("{genreName}")]
-        public IActionResult GetMediaByGenre(string genreName, int page = 0, int pageSize = 10)
+        public IActionResult GetMediaByGenre(string genreName, int page = 1, int pageSize = 10)
         {
             var mediaList = _genreMediaService.GetMediaByGenre(genreName, page, pageSize);
             if (mediaList == null || !mediaList.Any())
                 return NotFound($"No media found for genre: {genreName}");
 
-            var result = mediaList.Select(m => new GetMediaByGenreRequest
+            var result = mediaList.Select(m => new GetMediaByGenreDTO
             {
                 MediaId = m.Id,
                 Title = m.Titles.FirstOrDefault()?.Title1,

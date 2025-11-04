@@ -55,8 +55,8 @@ builder.Services.AddScoped<IFavoriteService>(provider =>
 builder.Services.AddScoped<IPeopleService>(provider =>
     new PeopleService(connectionString));
 
-builder.Services.AddScoped<IGenreMediaService>(provider =>
-    new GenreMediaService(connectionString));
+builder.Services.AddScoped<IMediaGenreService>(provider =>
+    new MediaGenreService(connectionString));
 
 builder.Services.AddScoped<ISimilarMovieService>(provider =>
     new SimilarMovieService(connectionString));

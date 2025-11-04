@@ -59,6 +59,9 @@ public partial class Media
     public ICollection<WatchHistory> WatchHistories { get; set; } = new List<WatchHistory>();
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+
+    public ICollection<MediaGenre> MediaGenres { get; set; } = new List<MediaGenre>();
+
     public ICollection<MediaListItem> Lists { get; set; } = new List<MediaListItem>();
     
     [NotMapped]
