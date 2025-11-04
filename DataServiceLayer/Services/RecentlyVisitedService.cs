@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataServiceLayer.Dtos;
+using DataServiceLayer.Helpers;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 
@@ -27,11 +29,17 @@ namespace DataServiceLayer.Services
                 MediaId = string.IsNullOrWhiteSpace(mediaId) ? null : mediaId
             };
 
-
-
             db.RecentlyVieweds.Add(newRecord);
 
             db.SaveChanges();
         }
+
+        public (List<RecentlyViewed>, int count) List(Guid userId, int page, int pageSize)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.RecentlyVieweds.Where(x => x.UserId == userId).GetPaginatedResult(page, pageSize);
+        }
+
     }
 }
