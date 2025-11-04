@@ -32,9 +32,14 @@ builder.Services.AddOpenApi();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var secret = builder.Configuration.GetSection("Auth:Secret").Value;
 
-builder.Services.AddSingleton<IUserService>(new UserService(connectionString));
-builder.Services.AddSingleton<IReviewService>(new ReviewService(connectionString));
-builder.Services.AddSingleton<IMediaService>(new MediaService(connectionString));
+builder.Services.AddScoped<IUserService>(provider =>
+    new UserService(connectionString));
+
+builder.Services.AddScoped<IReviewService>(provider =>
+    new ReviewService(connectionString));
+
+builder.Services.AddScoped<IMediaService>(provider =>
+    new MediaService(connectionString));
 
 builder.Services.AddScoped<IPlaylistService>(provider =>
     new PlaylistService(connectionString));
@@ -59,6 +64,8 @@ builder.Services.AddScoped<ISimilarMovieService>(provider =>
 builder.Services.AddScoped<IActorService>(provider =>
     new ActorService(connectionString));
 
+builder.Services.AddScoped<ISearchHistoryService>(provider =>
+    new SearchHistoryService(connectionString));
 
 builder.Services.AddMapster();
 
