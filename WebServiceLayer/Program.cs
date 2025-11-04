@@ -56,6 +56,9 @@ builder.Services.AddScoped<IGenreMediaService>(provider =>
 builder.Services.AddScoped<ISimilarMovieService>(provider =>
     new SimilarMovieService(connectionString));
 
+builder.Services.AddScoped<IActorService>(provider =>
+    new ActorService(connectionString));
+
 
 builder.Services.AddMapster();
 

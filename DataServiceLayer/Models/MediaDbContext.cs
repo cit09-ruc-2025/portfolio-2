@@ -47,6 +47,7 @@ public partial class MediaDbContext : DbContext
     public DbSet<Media> Media { get; set; }
 
     public DbSet<Person> People { get; set; }
+    public DbSet<CoActor> CoActors { get; set; }
 
     public DbSet<Rating> Ratings { get; set; }
 
@@ -293,6 +294,12 @@ public partial class MediaDbContext : DbContext
                 .HasColumnName("name_rating");
         });
 
+        modelBuilder.Entity<CoActor>(entity =>
+        {
+            entity.HasNoKey(); 
+        });
+
+
         modelBuilder.Entity<Rating>(entity =>
         {
             entity.HasKey(e => new { e.UserId, e.MediaId }).HasName("ratings_pkey");
@@ -363,7 +370,7 @@ public partial class MediaDbContext : DbContext
 
         modelBuilder.Entity<MediaLanguage>(entity =>
         {
-            entity.ToTable("media_languages"); 
+            entity.ToTable("media_languages");
 
             entity.HasKey(ml => new { ml.MediaId, ml.LanguageName })
                 .HasName("media_languages_pkey");
