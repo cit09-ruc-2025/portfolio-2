@@ -48,8 +48,9 @@ namespace WebServiceLayer.Controllers
         {
             var routeValues = new RouteValueDictionary(HttpContext.GetRouteData().Values);
 
-            foreach (var kv in new RouteValueDictionary(values))
-                routeValues[kv.Key] = kv.Value;
+            Console.WriteLine(endpointName);
+
+            Console.WriteLine(_generator.GetUriByName(HttpContext, endpointName, routeValues));
 
             return _generator.GetUriByName(HttpContext, endpointName, routeValues);
 

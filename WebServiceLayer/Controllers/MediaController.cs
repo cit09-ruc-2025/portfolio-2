@@ -121,6 +121,6 @@ namespace WebServiceLayer.Controllers
             var result = CreatePaging(nameof(GetMediaList), mapped, total, queryParams);
             return Ok(result);
         }
-        
+
     }
 }
