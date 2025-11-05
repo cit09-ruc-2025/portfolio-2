@@ -1,6 +1,5 @@
 using DataServiceLayer.Models;
 using DataServiceLayer.Interfaces;
-using ListEntity = DataServiceLayer.Models.List;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +17,7 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public List CreatePlaylist(Guid userID, string title, string? description)
+        public UserList CreatePlaylist(Guid userID, string title, string? description)
         {
             var existingUser = _db.Users.FirstOrDefault(u => u.Id == userID);
             if (existingUser == null)
@@ -26,7 +25,7 @@ namespace DataServiceLayer.Services
                 throw new Exception("User does not exist.");
             }
 
-            var playlist = new List
+            var playlist = new UserList
             {
                 Id = Guid.NewGuid(),
                 UserId = userID,  // must exist in Users table
@@ -46,60 +45,51 @@ namespace DataServiceLayer.Services
             var list = _db.Lists.FirstOrDefault(l => l.Id == listId);
             if (list == null) return false;
 
-            list.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+            list.UpdatedAt = DateTime.Now;
 
             if (isMedia)
             {
-                if (_db.MediaListItems.Any(mi => mi.ListId == listId && mi.MediaId == itemId))
-                    return false;
-
-                var media = _db.Media.FirstOrDefault(m => m.Id == itemId);
+                var media = _db.Media.Find(itemId);
                 if (media == null) return false;
+                if (list.Media.Any(m => m.Id == itemId)) return false;
 
-                _db.MediaListItems.Add(new MediaListItem
-                {
-                    ListId = listId,
-                    MediaId = itemId
-                });
+                list.Media.Add(media);
             }
             else
             {
-                if (_db.PeopleListItems.Any(pi => pi.ListId == listId && pi.PeopleId == itemId))
-                    return false;
+                var people = _db.People.Find(itemId);
 
-                var person = _db.People.FirstOrDefault(p => p.Id == itemId);
-                if (person == null) return false;
+                if (people == null) return false;
+                if (list.People.Any(p => p.Id == itemId)) return false;
 
-                _db.PeopleListItems.Add(new PeopleListItem
-                {
-                    ListId = listId,
-                    PeopleId = itemId
-                });
+                list.People.Add(people);
             }
 
             _db.SaveChanges();
             return true;
         }
+
         public bool RemoveItemFromPlaylist(Guid listId, string itemId, bool isMedia)
         {
+            var list = _db.Lists.FirstOrDefault(l => l.Id == listId);
+            if (list == null) return false;
+
             if (isMedia)
             {
-                var mediaItem = _db.MediaListItems.FirstOrDefault(mi => mi.ListId == listId && mi.MediaId == itemId);
+                var mediaItem = _db.Media.FirstOrDefault(m => m.Id == itemId);
                 if (mediaItem == null) return false;
 
-                _db.MediaListItems.Remove(mediaItem);
+                list.Media.Remove(mediaItem);
             }
             else
             {
-                var personItem = _db.PeopleListItems.FirstOrDefault(pi => pi.ListId == listId && pi.PeopleId == itemId);
+                var personItem = _db.People.FirstOrDefault(p => p.Id == itemId);
                 if (personItem == null) return false;
 
-                _db.PeopleListItems.Remove(personItem);
+                list.People.Remove(personItem);
             }
 
-            var list = _db.Lists.FirstOrDefault(l => l.Id == listId);
-            if (list != null)
-                list.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified); ;
+            list.UpdatedAt = DateTime.Now;
 
             _db.SaveChanges();
             return true;
@@ -109,26 +99,19 @@ namespace DataServiceLayer.Services
         {
             var list = _db.Lists.FirstOrDefault(l => l.Id == listId);
             if (list == null) return false;
-
-            var mediaItems = _db.MediaListItems.Where(mi => mi.ListId == listId).ToList();
-            var peopleItems = _db.PeopleListItems.Where(pi => pi.ListId == listId).ToList();
-
-            _db.MediaListItems.RemoveRange(mediaItems);
-            _db.PeopleListItems.RemoveRange(peopleItems);
             _db.Lists.Remove(list);
 
             _db.SaveChanges();
             return true;
         }
 
-        public List<List> GetPlaylistsByUserId(Guid userId)
+        public List<UserList> GetPlaylistsByUserId(Guid userId)
         {
             return _db.Lists
                 .Where(p => p.UserId == userId)
-                .Include(p => p.MediaListItems)
-                    .ThenInclude(mi => mi.Media) 
-                .Include(p => p.PeopleListItems)
-                    .ThenInclude(pi => pi.People)
+                .Include(p => p.People)
+                    .Include(mi => mi.Media)
+                    .ThenInclude(m => m.Titles)
                 .ToList();
         }
 

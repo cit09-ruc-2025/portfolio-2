@@ -25,7 +25,7 @@ public partial class User
 
     public ICollection<FavoritePerson> FavoritePeople { get; set; } = new List<FavoritePerson>();
 
-    public ICollection<List> Lists { get; set; } = new List<List>();
+    public ICollection<UserList> Lists { get; set; } = new List<UserList>();
 
     public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 

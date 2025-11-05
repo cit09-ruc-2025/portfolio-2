@@ -23,5 +23,5 @@ public partial class Person
 
     public ICollection<RecentlyViewed> RecentlyVieweds { get; set; } = new List<RecentlyViewed>();
 
-    public ICollection<PeopleListItem> Lists { get; set; } = new List<PeopleListItem>();
+    public ICollection<UserList> Lists { get; set; } = new List<UserList>();
 }
