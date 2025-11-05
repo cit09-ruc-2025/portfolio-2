@@ -60,10 +60,8 @@ public partial class Media
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
 
-    public ICollection<MediaGenre> MediaGenres { get; set; } = new List<MediaGenre>();
+    public ICollection<UserList> Lists { get; set; } = new List<UserList>();
 
-    public ICollection<MediaListItem> Lists { get; set; } = new List<MediaListItem>();
-    
     [NotMapped]
     public string? DisplayTitle
     {

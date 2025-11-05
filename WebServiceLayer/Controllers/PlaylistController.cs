@@ -82,18 +82,18 @@ namespace WebServiceLayer.Controllers
             var dto = playlists.Select(p => new GetPlaylistByUserIdDTO
             {
                 Id = p.Id,
-                UserId = p.UserId,
+                UserId = Guid.Parse(p.UserId?.ToString()),
                 Title = p.Title,
                 Description = p.Description,
                 CreatedAt = p.CreatedAt ?? DateTime.MinValue,  // handle nullable
                 UpdatedAt = p.UpdatedAt ?? DateTime.MinValue,  // handle nullable
-                MediaListItems = p.MediaListItems.Select(mi => new MediaListItemDTO
+                MediaListItems = p.Media.Select(mi => new MediaListItemDTO
                 {
-                    MediaId = mi.MediaId
+                    MediaId = mi.Id
                 }).ToList(),
-                PeopleListItems = p.PeopleListItems.Select(pi => new PeopleListItemDTO
+                PeopleListItems = p.People.Select(pi => new PeopleListItemDTO
                 {
-                    PeopleId = pi.PeopleId
+                    PeopleId = pi.Id
                 }).ToList()
             }).ToList();
 
