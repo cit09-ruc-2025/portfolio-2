@@ -19,8 +19,8 @@ namespace WebServiceLayer.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("peopleId")]
-        public ActionResult<PeopleDTO> Get(string peopleId)
+        [HttpGet("{peopleId}", Name = nameof(GetPeople))]
+        public ActionResult<PeopleDTO> GetPeople(string peopleId)
         {
             var person = _peopleService.GetPersonById(peopleId);
 

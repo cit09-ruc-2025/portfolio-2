@@ -95,7 +95,8 @@ namespace WebServiceLayer.Controllers
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)
         {
             var model = _mapper.Map<ReviewWithRating>(rating);
-            model.UserUrl = GetUrl(nameof(ReviewList), new { id = rating.UserId });
+            model.MediaUrl = GetUrl(nameof(GetMediaById), new { mediaId = rating.MediaId });
+            model.UserUrl = GetUrl(nameof(UserController.UserDetails), new { id = rating.UserId });
             return model;
         }
 
@@ -131,5 +132,6 @@ namespace WebServiceLayer.Controllers
 
             return Ok(dto);
         }
+
     }
 }

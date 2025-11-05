@@ -2,16 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using DataServiceLayer.Interfaces;
 using WebServiceLayer.Models;
 using System.Linq;
+using WebServiceLayer.Controllers;
+using DataServiceLayer.Models;
 
 namespace WebServicesLayer.Controllers
 {
     [ApiController]
     [Route("api/genre")]
-    public class GenreMediaController : ControllerBase
+    public class GenreMediaController : BaseController
     {
         private readonly IMediaGenreService _genreMediaService;
 
-        public GenreMediaController(IMediaGenreService genreMediaService)
+        public GenreMediaController(IMediaGenreService genreMediaService, LinkGenerator linkGenerator) : base(linkGenerator)
         {
             _genreMediaService = genreMediaService;
         }
@@ -26,6 +28,7 @@ namespace WebServicesLayer.Controllers
             var result = mediaList.Select(m => new GetMediaByGenreDTO
             {
                 MediaId = m.Id,
+                MediaUrl = GetUrl(nameof(MediaController.GetMediaById), new { mediaId = m.Id }),
                 Title = m.Titles.FirstOrDefault()?.Title1,
                 ReleaseYear = m.ReleaseYear,
                 Poster = m.Poster,

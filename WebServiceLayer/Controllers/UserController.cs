@@ -27,7 +27,7 @@ namespace WebServiceLayer.Controllers
             _reviewService = reviewService;
             _mapper = mapper;
         }
-        
+
         [HttpPost]
         public IActionResult CreateUser(CreateUserRequest user)
         {
@@ -110,10 +110,29 @@ namespace WebServiceLayer.Controllers
             return Ok(results);
         }
 
+        [HttpGet("{id}", Name = nameof(UserDetails))]
+        public IActionResult UserDetails(string id)
+        {
+            if (!Guid.TryParse(id, out var userId))
+            {
+                return BadRequest(new { message = "INVALID_ID" });
+            }
+
+            var user = _userService.GetById(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+
+        }
+
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)
         {
             var model = _mapper.Map<ReviewWithRating>(rating);
-            model.UserUrl = GetUrl(nameof(UserReviewList), new { id = rating.UserId });
+            model.UserUrl = GetUrl(nameof(UserDetails), new { id = rating.UserId });
+            model.MediaUrl = GetUrl(nameof(MediaController.GetMediaById), new { mediaId = rating.MediaId });
             return model;
         }
 

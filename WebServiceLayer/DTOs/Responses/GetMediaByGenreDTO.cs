@@ -13,5 +13,6 @@ namespace WebServiceLayer.Models
         public int? ReleaseYear { get; set; }
         public string? Poster { get; set; }
         public decimal? AverageRating { get; set; }
+        public string? MediaUrl { get; set; }
     }
 }
