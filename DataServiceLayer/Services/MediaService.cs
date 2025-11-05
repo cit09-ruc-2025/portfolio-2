@@ -95,5 +95,44 @@ namespace DataServiceLayer.Services
             };
             return result;
         }
+
+        public MediaDetailDTO? GetMediaDetails(string mediaId)
+        {
+            using var db = new MediaDbContext(_connectionString);
+
+            var media = db.Media
+                          .Include(m => m.MediaPeople)
+                              .ThenInclude(mp => mp.People)
+                          .Include(m => m.MediaPeople)
+                              .ThenInclude(mp => mp.Role)
+                          .Include(m => m.Titles)
+                          .FirstOrDefault(m => m.Id == mediaId);
+
+            if (media == null) return null;
+
+            var people = media.MediaPeople
+                             .Select(mp => new PersonRoleDTO
+                             {
+                                 Name = mp.People.Name,
+                                 Role = mp.Role.Name
+                             })
+                             .ToList();
+
+            var primaryTitle = media.Titles.OrderBy(t => t.Ordering).FirstOrDefault()?.Title1;
+
+            return new MediaDetailDTO
+            {
+                Id = media.Id,
+                Title = primaryTitle,
+                ReleaseYear = media.ReleaseYear,
+                RuntimeMinutes = media.RuntimeMinutes,
+                Plot = media.Plot,
+                Poster = media.Poster,
+                ImdbAverageRating = media.ImdbAverageRating,
+                ImdbNumberOfVotes = media.ImdbNumberOfVotes,
+                AverageRating = media.AverageRating,
+                PeopleInvolved = people
+            };
+        }
     }
 }

@@ -122,5 +122,14 @@ namespace WebServiceLayer.Controllers
             return Ok(result);
         }
 
+        [HttpGet("details/{mediaId}")]
+        public IActionResult GetMediaDetails(string mediaId)
+        {
+            var dto = _mediaService.GetMediaDetails(mediaId);
+
+            if (dto == null) return NotFound();
+
+            return Ok(dto);
+        }
     }
 }
