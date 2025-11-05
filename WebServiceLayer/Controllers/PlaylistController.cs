@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using System;
-using WebServiceLayer.Models;
-using MapsterMapper;
+using System.Linq;
+using WebServiceLayer.DTOs.Requests;
+using WebServiceLayer.DTOs.Responses;
 
 namespace WebServiceLayer.Controllers
 {
@@ -21,65 +21,53 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpPost("create")]
-        public ActionResult<GetPlaylistByUserIdDTO> CreatePlaylist([FromBody] CreatePlaylistDTO request)
+        [Authorize]
+        public IActionResult CreatePlaylist([FromBody] CreatePlaylistDTO request)
         {
-            var playlist = _playlistService.CreatePlaylist(request.UserId, request.Title, request.Description);
-            var dto = MapToDTO(playlist);
-            return Ok(dto);
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            if (userIdClaim == null) return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var playlist = _playlistService.CreatePlaylist(currentUserId, request.Title, request.Description);
+            return Ok(playlist);
         }
 
         [HttpPost("{playlistId}/add")]
-        public IActionResult AddItemToPlaylist(
-            [FromRoute] Guid playlistId,
-            [FromBody] AddItemToPlaylistDTO request)
+        [Authorize]
+        public IActionResult AddItemToPlaylist(Guid playlistId, [FromBody] AddItemToPlaylistDTO request)
         {
-            var loggedInUserId = Guid.Parse(User.FindFirst("id")?.Value ?? Guid.Empty.ToString());
-            var playlist = _playlistService.GetPlaylistsByUserId(loggedInUserId)
-                                           .FirstOrDefault(p => p.Id == playlistId);
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            if (userIdClaim == null) return Unauthorized();
 
-            if (playlist == null)
-                return NotFound(new { message = "Playlist not found" });
-
-            if (playlist.UserId != loggedInUserId)
-                return Unauthorized(new { message = "You do not own this playlist" });
-
-            var result = _playlistService.AddItemToPlaylist(playlistId, request.ItemId, request.IsMedia);
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var result = _playlistService.AddItemToPlaylist(playlistId, request.ItemId, request.IsMedia, currentUserId);
+            if (!result) return BadRequest(new { message = "Failed to add item" });
             return Ok(result);
         }
 
         [HttpPost("{playlistId}/remove")]
-        public IActionResult RemoveItemFromPlaylist(
-            [FromRoute] Guid playlistId,
-            [FromBody] AddItemToPlaylistDTO request)
+        [Authorize]
+        public IActionResult RemoveItemFromPlaylist(Guid playlistId, [FromBody] AddItemToPlaylistDTO request)
         {
-            var loggedInUserId = Guid.Parse(User.FindFirst("id")?.Value ?? Guid.Empty.ToString());
-            var playlist = _playlistService.GetPlaylistsByUserId(loggedInUserId)
-                                           .FirstOrDefault(p => p.Id == playlistId);
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            if (userIdClaim == null) return Unauthorized();
 
-            if (playlist == null)
-                return NotFound(new { message = "Playlist not found" });
-
-            if (playlist.UserId != loggedInUserId)
-                return Unauthorized(new { message = "You do not own this playlist" });
-
-            var result = _playlistService.RemoveItemFromPlaylist(playlistId, request.ItemId, request.IsMedia);
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var result = _playlistService.RemoveItemFromPlaylist(playlistId, request.ItemId, request.IsMedia, currentUserId);
+            if (!result) return BadRequest(new { message = "Failed to remove item" });
             return Ok(result);
         }
 
         [HttpDelete("{playlistId}")]
-        public IActionResult DeletePlaylist([FromRoute] Guid playlistId)
+        [Authorize]
+        public IActionResult DeletePlaylist(Guid playlistId)
         {
-            var loggedInUserId = Guid.Parse(User.FindFirst("id")?.Value ?? Guid.Empty.ToString());
-            var playlist = _playlistService.GetPlaylistsByUserId(loggedInUserId)
-                                           .FirstOrDefault(p => p.Id == playlistId);
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            if (userIdClaim == null) return Unauthorized();
 
-            if (playlist == null)
-                return NotFound(new { message = "Playlist not found" });
-
-            if (playlist.UserId != loggedInUserId)
-                return Unauthorized(new { message = "You do not own this playlist" });
-
-            var result = _playlistService.DeletePlaylist(playlistId);
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var result = _playlistService.DeletePlaylist(playlistId, currentUserId);
+            if (!result) return NotFound(new { message = "Playlist not found or not owned by you" });
             return Ok(result);
         }
 
@@ -87,32 +75,25 @@ namespace WebServiceLayer.Controllers
         public IActionResult GetPlaylistsByUserId(Guid userId)
         {
             var playlists = _playlistService.GetPlaylistsByUserId(userId);
-
-            var dto = playlists.Select(p => MapToDTO(p)).ToList();
-
+            var dto = playlists.Select(MapToDTO).ToList();
             return Ok(dto);
         }
 
-        private GetPlaylistByUserIdDTO MapToDTO(UserList playlist)
+        private PlaylistDTO MapToDTO(UserList playlist)
         {
-            return new GetPlaylistByUserIdDTO
+            return new PlaylistDTO
             {
                 Id = playlist.Id,
-                UserId = Guid.Parse(playlist.UserId?.ToString()),
+                UserId = playlist.UserId!.Value,
                 Title = playlist.Title,
                 Description = playlist.Description,
-                CreatedAt = playlist.CreatedAt ?? DateTime.MinValue,  // handle nullable
-                UpdatedAt = playlist.UpdatedAt ?? DateTime.MinValue,  // handle nullable
-                MediaListItems = playlist.Media.Select(mi => new MediaListItemDTO
-                {
-                    MediaId = mi.Id
-                }).ToList(),
-                PeopleListItems = playlist.People.Select(pi => new PeopleListItemDTO
-                {
-                    PeopleId = pi.Id
-                }).ToList()
+                IsPublic = playlist.IsPublic,
+                CreatedAt = playlist.CreatedAt ?? DateTime.UtcNow,
+                UpdatedAt = playlist.UpdatedAt ?? DateTime.UtcNow,
+                MediaIds = playlist.Media.Select(m => m.Id).ToList(),
+                PeopleIds = playlist.People.Select(p => p.Id).ToList(),
+                User = new UserDTO { Id = playlist.User.Id, Username = playlist.User.Username }
             };
         }
-
     }
 }

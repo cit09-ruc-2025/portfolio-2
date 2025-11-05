@@ -8,9 +8,9 @@ namespace DataServiceLayer.Interfaces
     {
 
         UserList CreatePlaylist(Guid userID, string title, string? description);
-        bool AddItemToPlaylist(Guid listId, string itemId, bool isMedia);
-        bool RemoveItemFromPlaylist(Guid listId, string itemId, bool isMedia);
-        bool DeletePlaylist(Guid listId);
+        bool AddItemToPlaylist(Guid listId, string itemId, bool isMedia, Guid currentUserId);
+        bool RemoveItemFromPlaylist(Guid listId, string itemId, bool isMedia, Guid currentUserId);
+        bool DeletePlaylist(Guid listId, Guid currentUserId);
         List<UserList> GetPlaylistsByUserId(Guid userId);
 
     }

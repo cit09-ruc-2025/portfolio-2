@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebServiceLayer.Models
+namespace WebServiceLayer.DTOs.Requests
 {
     public class RemoveItemFromPlaylistDTO
     {

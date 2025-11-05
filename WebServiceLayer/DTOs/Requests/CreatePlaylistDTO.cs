@@ -1,13 +1,9 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebServiceLayer.Models
+namespace WebServiceLayer.DTOs.Requests
 {
     public class CreatePlaylistDTO
     {
-        [Required(ErrorMessage = "USERID_REQUIRED")]
-        public Guid UserId { get; set; }
-
         [Required(ErrorMessage = "TITLE_REQUIRED")]
         [MaxLength(100, ErrorMessage = "TITLE_MAX_LENGTH_EXCEEDED")]
         [MinLength(3, ErrorMessage = "TITLE_MIN_LENGTH")]
@@ -17,4 +13,3 @@ namespace WebServiceLayer.Models
         public string? Description { get; set; }
     }
 }
-

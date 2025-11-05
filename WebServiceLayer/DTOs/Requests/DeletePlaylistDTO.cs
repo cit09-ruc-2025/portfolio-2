@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebServiceLayer.Models
+namespace WebServiceLayer.DTOs.Requests
 {
     public class DeletePlaylistDTO
     {
