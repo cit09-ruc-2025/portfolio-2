@@ -15,8 +15,6 @@ namespace WebServiceLayer.Models
 
         [MaxLength(500, ErrorMessage = "DESCRIPTION_MAX_LENGTH_EXCEEDED")]
         public string? Description { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
     }
 }
 

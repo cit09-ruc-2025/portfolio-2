@@ -3,6 +3,7 @@ using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using System;
 using WebServiceLayer.Models;
+using MapsterMapper;
 
 namespace WebServiceLayer.Controllers
 {
@@ -18,10 +19,11 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult CreatePlaylist([FromBody] CreatePlaylistDTO request)
+        public ActionResult<GetPlaylistByUserIdDTO> CreatePlaylist([FromBody] CreatePlaylistDTO request)
         {
             var playlist = _playlistService.CreatePlaylist(request.UserId, request.Title, request.Description);
-            return Ok(playlist);
+            var dto = MapToDTO(playlist);
+            return Ok(dto);
         }
 
         [HttpPost("user/{userId}/{playlistId}/add")]
@@ -79,25 +81,30 @@ namespace WebServiceLayer.Controllers
         {
             var playlists = _playlistService.GetPlaylistsByUserId(userId);
 
-            var dto = playlists.Select(p => new GetPlaylistByUserIdDTO
+            var dto = playlists.Select(p => MapToDTO(p)).ToList();
+
+            return Ok(dto);
+        }
+
+        private GetPlaylistByUserIdDTO MapToDTO(UserList playlist)
+        {
+            return new GetPlaylistByUserIdDTO
             {
-                Id = p.Id,
-                UserId = Guid.Parse(p.UserId?.ToString()),
-                Title = p.Title,
-                Description = p.Description,
-                CreatedAt = p.CreatedAt ?? DateTime.MinValue,  // handle nullable
-                UpdatedAt = p.UpdatedAt ?? DateTime.MinValue,  // handle nullable
-                MediaListItems = p.Media.Select(mi => new MediaListItemDTO
+                Id = playlist.Id,
+                UserId = Guid.Parse(playlist.UserId?.ToString()),
+                Title = playlist.Title,
+                Description = playlist.Description,
+                CreatedAt = playlist.CreatedAt ?? DateTime.MinValue,  // handle nullable
+                UpdatedAt = playlist.UpdatedAt ?? DateTime.MinValue,  // handle nullable
+                MediaListItems = playlist.Media.Select(mi => new MediaListItemDTO
                 {
                     MediaId = mi.Id
                 }).ToList(),
-                PeopleListItems = p.People.Select(pi => new PeopleListItemDTO
+                PeopleListItems = playlist.People.Select(pi => new PeopleListItemDTO
                 {
                     PeopleId = pi.Id
                 }).ToList()
-            }).ToList();
-
-            return Ok(dto);
+            };
         }
 
     }
