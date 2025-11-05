@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataServiceLayer.Dtos;
 using DataServiceLayer.Interfaces;
+using DataServiceLayer.Models;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebServiceLayer.DTOs.Responses;
 using WebServiceLayer.Models;
 
 namespace WebServiceLayer.Controllers
@@ -17,13 +20,14 @@ namespace WebServiceLayer.Controllers
         private readonly IRecentlyVisited _recentlyVisitedService;
         private readonly IMediaService _mediaService;
         private readonly IPeopleService _peopleService;
-
         private readonly LinkGenerator _linkGenerator;
-        public RecentlyVisitedController(IRecentlyVisited recentlyVisitedService, IMediaService mediaService, IPeopleService peopleService, LinkGenerator linkGenerator) : base(linkGenerator)
+        private readonly IMapper _mapper;
+        public RecentlyVisitedController(IRecentlyVisited recentlyVisitedService, IMediaService mediaService, IPeopleService peopleService, LinkGenerator linkGenerator, IMapper mapper) : base(linkGenerator)
         {
             _recentlyVisitedService = recentlyVisitedService;
             _mediaService = mediaService;
             _peopleService = peopleService;
+            _mapper = mapper;
         }
 
         [Authorize]
@@ -69,13 +73,23 @@ namespace WebServiceLayer.Controllers
 
         [Authorize]
         [HttpGet(Name = nameof(ListRecentlyVisited))]
-        public IActionResult ListRecentlyVisited([FromBody] AddToRecent recentRecord, [FromQuery] QueryParams queryParams)
+        public IActionResult ListRecentlyVisited([FromQuery] QueryParams queryParams)
         {
             var userId = Guid.Parse(User.FindFirst("id")!.Value);
 
             var recentlyVisited = _recentlyVisitedService.List(userId, queryParams.Page, queryParams.PageSize);
 
-            return Ok(CreatePaging(nameof(ListRecentlyVisited), recentlyVisited.Item1, recentlyVisited.count, queryParams));
+            var mappedList = recentlyVisited.Item1.Select(x => CreateRecentlyViewed(x));
+
+            return Ok(CreatePaging(nameof(ListRecentlyVisited), mappedList, recentlyVisited.count, queryParams));
+        }
+
+        private RecentlyVisitedDTO CreateRecentlyViewed(RecentlyViewed recentlyVisited)
+        {
+            var model = _mapper.Map<RecentlyVisitedDTO>(recentlyVisited);
+            model.MediaUrl = GetUrl(nameof(MediaController.GetMediaById), new { mediaId = recentlyVisited.MediaId });
+            model.PeopleUrl = GetUrl(nameof(PeopleController.GetPeople), new { peopleId = recentlyVisited.PeopleId });
+            return model;
         }
     }
 }
