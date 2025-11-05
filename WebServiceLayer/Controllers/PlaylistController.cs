@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using System;
 using WebServiceLayer.Models;
 using MapsterMapper;
@@ -26,51 +28,56 @@ namespace WebServiceLayer.Controllers
             return Ok(dto);
         }
 
-        [HttpPost("user/{userId}/{playlistId}/add")]
+        [HttpPost("{playlistId}/add")]
         public IActionResult AddItemToPlaylist(
-            [FromRoute] Guid userId,
             [FromRoute] Guid playlistId,
             [FromBody] AddItemToPlaylistDTO request)
         {
-            var playlist = _playlistService.GetPlaylistsByUserId(userId).FirstOrDefault(p => p.Id == playlistId);
+            var loggedInUserId = Guid.Parse(User.FindFirst("id")?.Value ?? Guid.Empty.ToString());
+            var playlist = _playlistService.GetPlaylistsByUserId(loggedInUserId)
+                                           .FirstOrDefault(p => p.Id == playlistId);
+
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
-            if (playlist.UserId != userId)
-                return Unauthorized(new { message = "You do not have permission" });
+            if (playlist.UserId != loggedInUserId)
+                return Unauthorized(new { message = "You do not own this playlist" });
 
             var result = _playlistService.AddItemToPlaylist(playlistId, request.ItemId, request.IsMedia);
             return Ok(result);
         }
 
-        [HttpPost("user/{userId}/{playlistId}/remove")]
+        [HttpPost("{playlistId}/remove")]
         public IActionResult RemoveItemFromPlaylist(
-            [FromRoute] Guid userId,
             [FromRoute] Guid playlistId,
             [FromBody] AddItemToPlaylistDTO request)
         {
-            var playlist = _playlistService.GetPlaylistsByUserId(userId).FirstOrDefault(p => p.Id == playlistId);
+            var loggedInUserId = Guid.Parse(User.FindFirst("id")?.Value ?? Guid.Empty.ToString());
+            var playlist = _playlistService.GetPlaylistsByUserId(loggedInUserId)
+                                           .FirstOrDefault(p => p.Id == playlistId);
+
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
-            if (playlist.UserId != userId)
-                return Unauthorized(new { message = "You do not have permission" });
+            if (playlist.UserId != loggedInUserId)
+                return Unauthorized(new { message = "You do not own this playlist" });
 
             var result = _playlistService.RemoveItemFromPlaylist(playlistId, request.ItemId, request.IsMedia);
             return Ok(result);
         }
 
-        [HttpDelete("user/{userId}/{playlistId}")]
-        public IActionResult DeletePlaylist(
-            [FromRoute] Guid userId,
-            [FromRoute] Guid playlistId)
+        [HttpDelete("{playlistId}")]
+        public IActionResult DeletePlaylist([FromRoute] Guid playlistId)
         {
-            var playlist = _playlistService.GetPlaylistsByUserId(userId).FirstOrDefault(p => p.Id == playlistId);
+            var loggedInUserId = Guid.Parse(User.FindFirst("id")?.Value ?? Guid.Empty.ToString());
+            var playlist = _playlistService.GetPlaylistsByUserId(loggedInUserId)
+                                           .FirstOrDefault(p => p.Id == playlistId);
+
             if (playlist == null)
                 return NotFound(new { message = "Playlist not found" });
 
-            if (playlist.UserId != userId)
-                return Unauthorized(new { message = "You do not have permission" });
+            if (playlist.UserId != loggedInUserId)
+                return Unauthorized(new { message = "You do not own this playlist" });
 
             var result = _playlistService.DeletePlaylist(playlistId);
             return Ok(result);
