@@ -33,7 +33,7 @@ namespace WebServiceLayer.Controllers
 
             if (favorites.TotalCount == 0) return NoContent();
 
-            var dto = _mapper.Map<List<FavoriteMediaDTO>>(favorites);
+            var dto = _mapper.Map<List<FavoriteMediaDTO>>(favorites.FavoriteMedia);
 
             return Ok(CreatePaging(nameof(GetFavoriteMedia), dto, favorites.TotalCount, queryParams));
         }
@@ -47,7 +47,7 @@ namespace WebServiceLayer.Controllers
             return Created(location!, null);
         }
 
-        [HttpDelete("peopleId")]
+        [HttpDelete("mediaId")]
         public ActionResult Delete(Guid userId, string mediaId)
         {
             var success = _favoriteService.UnfavoriteMedia(userId, mediaId);

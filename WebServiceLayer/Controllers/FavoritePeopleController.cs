@@ -33,7 +33,7 @@ namespace WebServiceLayer.Controllers
 
             if (favorites.TotalCount == 0) return NoContent();
 
-            var dto = _mapper.Map<List<FavoritePeopleDTO>>(favorites);
+            var dto = _mapper.Map<List<FavoritePeopleDTO>>(favorites.FavoritePeople);
 
             return Ok(CreatePaging(nameof(GetFavoritePeople), dto, favorites.TotalCount, queryParams));
         }
