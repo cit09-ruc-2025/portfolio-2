@@ -101,9 +101,21 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet(Name = nameof(GetMediaList))]
-        public async Task<IActionResult> GetMediaList([FromQuery] QueryParams queryParams)
+        public async Task<IActionResult> GetMediaList([FromQuery] QueryParams queryParams, [FromQuery] string? orderBy = null)
         {
-            var (items, total) = await _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize);
+            var validSort = MediaSortBy.ReleaseYear;
+
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                var pascalCaseSortBy = ToPascalCase(orderBy);
+
+                if (Enum.TryParse<MediaSortBy>(pascalCaseSortBy, ignoreCase: true, out var parsedSort))
+                {
+                    validSort = parsedSort;
+                }
+            }
+
+            var (items, total) = await _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize, validSort);
 
             if (items.Count == 0)
                 return NoContent();
@@ -116,11 +128,21 @@ namespace WebServiceLayer.Controllers
                 ageRating = m.AgeRating,
                 poster = m.Poster,
                 genres = m.Genres.Select(g => g.Name),
-                dvdReleaseDate = m.DvdRelease?.ReleaseDate
+                dvdReleaseDate = m.DvdRelease?.ReleaseDate,
+                episode = m.EpisodeEpisodeMedia,
+                averageRating = m.AverageRating,
+                imdbRating = m.ImdbAverageRating,
+                mediaType = m.MediaType
             });
 
             var result = CreatePaging(nameof(GetMediaList), mapped, total, queryParams);
             return Ok(result);
+        }
+
+        private string ToPascalCase(string snakeCase)
+        {
+            var parts = snakeCase.Split('_');
+            return string.Concat(parts.Select(p => char.ToUpper(p[0]) + p.Substring(1)));
         }
 
         [HttpGet("details/{mediaId}")]

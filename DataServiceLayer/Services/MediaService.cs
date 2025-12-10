@@ -37,14 +37,28 @@ namespace DataServiceLayer.Services
 
         }
 
-        public async Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize)
+        public async Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize, MediaSortBy sortBy = MediaSortBy.ReleaseYear)
         {
             using var db = new MediaDbContext(_connectionString);
 
             var totalCount = await db.Media.CountAsync();
 
-            var pagedMedia = await db.Media
-                .OrderBy(m => m.ReleaseYear)
+            IQueryable<Media> query = db.Media
+                .Where(m => !m.EpisodeEpisodeMedia.Any() &&
+                            (m.MediaType == "movie" || m.MediaType == "tvSeries"));
+
+            switch (sortBy)
+            {
+                case MediaSortBy.ImdbAverageRating:
+                    query = query.OrderByDescending(m => m.ImdbAverageRating ?? 0);
+                    break;
+                default:
+                    query = query.OrderByDescending(m => m.ReleaseYear ?? 0);
+                    break;
+            }
+
+
+            var pagedMedia = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
