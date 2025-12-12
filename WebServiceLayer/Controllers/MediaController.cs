@@ -20,13 +20,15 @@ namespace WebServiceLayer.Controllers
         private readonly IMediaService _mediaService;
         private readonly IReviewService _reviewService;
         private readonly IPeopleService _peopleService;
+        private readonly IEpisodeService _episodeService;
         protected readonly IMapper _mapper;
 
-        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, LinkGenerator generator, IMapper mapper) : base(generator)
+        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
             _peopleService = peopleService;
+            _episodeService = episodeService;
             _mapper = mapper;
         }
 
@@ -101,6 +103,15 @@ namespace WebServiceLayer.Controllers
             }).ToList();
 
             return Ok(CreatePaging(nameof(GetPeopleForMedia), dtos, mediaPeopleWithCount.TotalCount, queryParams));
+        }
+
+        [HttpGet("{mediaId}/episodes", Name = nameof(GetMediaEpisodes))]
+        public ActionResult<List<EpisodeList>> GetMediaEpisodes(string mediaId)
+        {
+            var mediaEpisodes = _episodeService.GetEpisodeList(mediaId);
+            return Ok(mediaEpisodes);
+
+
         }
 
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)
