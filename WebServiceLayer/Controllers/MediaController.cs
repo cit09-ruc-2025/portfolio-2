@@ -35,6 +35,17 @@ namespace WebServiceLayer.Controllers
         {
             var media = _mediaService.GetById(mediaId);
 
+            if (media == null)
+            {
+                return NotFound(new
+                {
+                    errors = new
+                    {
+                        media = "MEDIA_NOT_FOUND"
+                    }
+                });
+            }
+
             return Ok(media);
         }
 
@@ -144,16 +155,5 @@ namespace WebServiceLayer.Controllers
             var parts = snakeCase.Split('_');
             return string.Concat(parts.Select(p => char.ToUpper(p[0]) + p.Substring(1)));
         }
-
-        [HttpGet("details/{mediaId}")]
-        public IActionResult GetMediaDetails(string mediaId)
-        {
-            var dto = _mediaService.GetMediaDetails(mediaId);
-
-            if (dto == null) return NotFound();
-
-            return Ok(dto);
-        }
-
     }
 }

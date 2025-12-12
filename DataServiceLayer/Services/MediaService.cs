@@ -17,11 +17,45 @@ namespace DataServiceLayer.Services
         {
             _connectionString = connectionString;
         }
-        public Media? GetById(string id)
+        public MediaDetailDTO? GetById(string id)
         {
             var db = new MediaDbContext(_connectionString);
-            var media = db.Media.FirstOrDefault(x => x.Id == id);
-            return media;
+            var media = db.Media
+                .Include(x => x.Genres)
+                .Include(x => x.Titles)
+                .Include(x => x.MediaLanguages)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (media == null)
+            {
+                return null;
+            }
+
+            bool hasEpisodes = db.Episodes
+                      .Any(e => e.SeriesMediaId == id);
+
+            var mediaDetail = new MediaDetailDTO
+            {
+                Id = media.Id,
+                AverageRating = media.AverageRating,
+                AgeRating = media.AgeRating,
+                BoxOffice = media.BoxOffice,
+                EndYear = media.EndYear,
+                ImdbAverageRating = media.ImdbAverageRating,
+                Production = media.Production,
+                ReleaseYear = media.ReleaseYear,
+                RuntimeMinutes = media.RuntimeMinutes,
+                WebsiteUrl = media.WebsiteUrl,
+                Poster = media.Poster,
+                Plot = media.Plot,
+                Genres = media.Genres?.Select((x) => x.Name).ToList() ?? new(),
+                Titles = media.Titles?.Select((x) => x.Title1).ToList() ?? new(),
+                Languages = media.MediaLanguages?.Select(l => l.LanguageName).ToList() ?? new(),
+                Title = media.Titles?.OrderBy(t => t.Ordering).FirstOrDefault()?.Title1,
+                HasEpisodes = hasEpisodes
+            };
+
+            return mediaDetail;
         }
 
         public async Task UpdateMediaRating(string id, MediaDbContext db)
@@ -108,45 +142,6 @@ namespace DataServiceLayer.Services
                 .ToList()
             };
             return result;
-        }
-
-        public MediaDetailDTO? GetMediaDetails(string mediaId)
-        {
-            using var db = new MediaDbContext(_connectionString);
-
-            var media = db.Media
-                          .Include(m => m.MediaPeople)
-                              .ThenInclude(mp => mp.People)
-                          .Include(m => m.MediaPeople)
-                              .ThenInclude(mp => mp.Role)
-                          .Include(m => m.Titles)
-                          .FirstOrDefault(m => m.Id == mediaId);
-
-            if (media == null) return null;
-
-            var people = media.MediaPeople
-                             .Select(mp => new PersonRoleDTO
-                             {
-                                 Name = mp.People.Name,
-                                 Role = mp.Role.Name
-                             })
-                             .ToList();
-
-            var primaryTitle = media.Titles.OrderBy(t => t.Ordering).FirstOrDefault()?.Title1;
-
-            return new MediaDetailDTO
-            {
-                Id = media.Id,
-                Title = primaryTitle,
-                ReleaseYear = media.ReleaseYear,
-                RuntimeMinutes = media.RuntimeMinutes,
-                Plot = media.Plot,
-                Poster = media.Poster,
-                ImdbAverageRating = media.ImdbAverageRating,
-                ImdbNumberOfVotes = media.ImdbNumberOfVotes,
-                AverageRating = media.AverageRating,
-                PeopleInvolved = people
-            };
         }
     }
 }

@@ -9,10 +9,9 @@ namespace DataServiceLayer.Interfaces
 {
         public interface IMediaService
         {
-                public Media? GetById(string id);
+                public MediaDetailDTO? GetById(string id);
                 public Task UpdateMediaRating(string id, MediaDbContext db);
                 Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize, MediaSortBy sortBy = MediaSortBy.ReleaseYear);
                 public PaginatedResult<MediaList> GetByTitle(string title, int page, int pageSize);
-                MediaDetailDTO? GetMediaDetails(string mediaId);
         }
 }
