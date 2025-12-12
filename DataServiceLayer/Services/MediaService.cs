@@ -34,6 +34,9 @@ namespace DataServiceLayer.Services
             bool hasEpisodes = db.Episodes
                       .Any(e => e.SeriesMediaId == id);
 
+            bool isEpisode = db.Episodes
+                      .Any(e => e.EpisodeMediaId == id);
+
             var mediaDetail = new MediaDetailDTO
             {
                 Id = media.Id,
@@ -52,7 +55,8 @@ namespace DataServiceLayer.Services
                 Titles = media.Titles?.Select((x) => x.Title1).ToList() ?? new(),
                 Languages = media.MediaLanguages?.Select(l => l.LanguageName).ToList() ?? new(),
                 Title = media.Titles?.OrderBy(t => t.Ordering).FirstOrDefault()?.Title1,
-                HasEpisodes = hasEpisodes
+                HasEpisodes = hasEpisodes,
+                IsEpisode = isEpisode
             };
 
             return mediaDetail;
@@ -78,8 +82,7 @@ namespace DataServiceLayer.Services
             var totalCount = await db.Media.CountAsync();
 
             IQueryable<Media> query = db.Media
-                .Where(m => !m.EpisodeEpisodeMedia.Any() &&
-                            (m.MediaType == "movie" || m.MediaType == "tvSeries"));
+                .Where(m => !m.EpisodeEpisodeMedia.Any());
 
             switch (sortBy)
             {

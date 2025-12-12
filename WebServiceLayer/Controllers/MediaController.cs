@@ -111,7 +111,6 @@ namespace WebServiceLayer.Controllers
             var mediaEpisodes = _episodeService.GetEpisodeList(mediaId);
             return Ok(mediaEpisodes);
 
-
         }
 
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)

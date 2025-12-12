@@ -24,5 +24,6 @@ namespace DataServiceLayer.Dtos
         public List<string> Languages { get; set; } = new();
         public string? AgeRating { get; set; }
         public bool? HasEpisodes { get; set; }
+        public bool? IsEpisode { get; set; }
     }
 }
