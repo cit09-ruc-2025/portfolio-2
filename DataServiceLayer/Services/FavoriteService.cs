@@ -109,5 +109,12 @@ namespace DataServiceLayer.Services
             var context = CreateContext();
             return context.FavoriteMedia.Where(fp => fp.UserId == userId).GetPaginatedResult(pageNumber, pageSize);
         }
+
+        public bool IsMediaFavorite(string mediaId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.FavoriteMedia.Any(x => x.MediaId == mediaId && x.UserId == userId);
+        }
     }
 }

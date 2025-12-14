@@ -7,6 +7,7 @@ using DataServiceLayer.DTOs;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebServiceLayer.DTOs.Responses;
 using WebServiceLayer.Models;
@@ -21,14 +22,16 @@ namespace WebServiceLayer.Controllers
         private readonly IReviewService _reviewService;
         private readonly IPeopleService _peopleService;
         private readonly IEpisodeService _episodeService;
+        private readonly IFavoriteService _favoriteService;
         protected readonly IMapper _mapper;
 
-        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, LinkGenerator generator, IMapper mapper) : base(generator)
+        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, IFavoriteService favoriteService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
             _peopleService = peopleService;
             _episodeService = episodeService;
+            _favoriteService = favoriteService;
             _mapper = mapper;
         }
 
@@ -110,6 +113,26 @@ namespace WebServiceLayer.Controllers
         {
             var mediaEpisodes = _episodeService.GetEpisodeList(mediaId);
             return Ok(mediaEpisodes);
+
+        }
+
+        [Authorize]
+        [HttpGet("{mediaId}/user-status")]
+        public ActionResult<MediaUserStatus> GetMediaUserStatus(string mediaId)
+        {
+            var userId = Guid.Parse(User.FindFirst("id")!.Value);
+
+            var userHasMediaReview = _reviewService.HasUserReviewed(mediaId, userId);
+
+            var isMediaFavorite = _favoriteService.IsMediaFavorite(mediaId, userId);
+
+            var mediaUserStatus = new MediaUserStatus
+            {
+                IsFavorite = isMediaFavorite,
+                IsReviewed = userHasMediaReview
+            };
+
+            return Ok(mediaUserStatus);
 
         }
 

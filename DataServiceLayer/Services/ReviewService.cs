@@ -206,5 +206,13 @@ namespace DataServiceLayer.Services
 
             return result;
         }
+
+        public bool HasUserReviewed(string mediaId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.Ratings.Any(x => x.MediaId == mediaId && x.UserId == userId);
+        }
+
     }
 }
