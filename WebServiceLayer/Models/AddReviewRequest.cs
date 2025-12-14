@@ -8,11 +8,11 @@ namespace WebServiceLayer.Models
 {
     public class AddReviewRequest
     {
-        [Required(ErrorMessage = "RATING_REQUIRED")]
-        [Range(1, 10, ErrorMessage = "RATING_OUT_OF_RANGE")]
+        [Required(ErrorMessage = "Rating is required")]
+        [Range(1, 10, ErrorMessage = "Rating should be between 1 and 10")]
         public required int Rating { get; set; }
 
-        [MaxLength(250, ErrorMessage = "REVIEW_MAX")]
+        [MaxLength(250, ErrorMessage = "Review cannot exceed 250 characters")]
         public string? Review { get; set; }
     }
 }
