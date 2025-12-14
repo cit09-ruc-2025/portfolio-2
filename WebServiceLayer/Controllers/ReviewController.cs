@@ -48,7 +48,7 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        mediaId = "MEDIA_NOT_FOUND"
+                        mediaId = "Media does not exist"
                     }
                 });
             }
@@ -65,7 +65,10 @@ namespace WebServiceLayer.Controllers
 
             await _reviewService.UpsertReview(newReview);
 
-            return Ok();
+            return Ok(new
+            {
+                message = "Successful"
+            });
         }
 
         [HttpDelete("{mediaId}")]
@@ -77,7 +80,7 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        mediaId = "MEDIA_ID_REQUIRED"
+                        mediaId = "Media Id is required"
                     }
                 });
             }
@@ -90,7 +93,7 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        mediaId = "MEDIA_NOT_FOUND"
+                        mediaId = "Media does not exist"
                     }
                 });
             }
@@ -105,14 +108,17 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        review = "REVIEW_NOT_FOUND"
+                        review = "Review not found"
                     }
                 });
             }
 
             await _reviewService.DeleteReview(existingRating);
 
-            return Ok();
+            return Ok(new
+            {
+                message = "Review deleted"
+            });
         }
 
     }

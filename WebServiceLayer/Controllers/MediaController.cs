@@ -46,7 +46,7 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        media = "MEDIA_NOT_FOUND"
+                        media = "Media does not exist"
                     }
                 });
             }
@@ -66,13 +66,22 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        media = "MEDIA_NOT_FOUND"
+                        media = "Media does not exist"
                     }
                 });
             }
 
+            Guid? userId = null;
+
+            var claim = User.FindFirst("id")?.Value;
+            if (!string.IsNullOrEmpty(claim))
+            {
+                userId = Guid.Parse(claim);
+            }
+
+
             var ratings = _reviewService
-                .GetByMediaId(mediaId, queryParams.Page, queryParams.PageSize);
+                .GetByMediaId(mediaId, queryParams.Page, queryParams.PageSize, userId);
 
             var mappedRatings = ratings.Items
             .Select(x => CreateRatingListModel(x));

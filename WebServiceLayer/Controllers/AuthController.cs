@@ -66,6 +66,7 @@ namespace WebServiceLayer.Controllers
             return Ok(new
             {
                 username = user.Username,
+                userId = user.Id,
                 token = jwtToken
             });
 

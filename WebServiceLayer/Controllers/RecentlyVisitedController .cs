@@ -52,7 +52,7 @@ namespace WebServiceLayer.Controllers
                 var media = _mediaService.GetById(recentRecord.MediaId);
                 if (media == null)
                 {
-                    return NotFound(new { message = "MEDIA_NOT_FOUND" });
+                    return NotFound(new { message = "Media does not exist" });
                 }
             }
 
