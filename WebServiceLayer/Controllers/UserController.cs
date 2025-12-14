@@ -8,6 +8,7 @@ using DataServiceLayer.Models;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebServiceLayer.DTOs.Responses;
 using WebServiceLayer.Models;
 using WebServiceLayer.Utils;
 
@@ -60,7 +61,7 @@ namespace WebServiceLayer.Controllers
                 Email = user.Email,
                 Username = user.Username,
                 HashedPassword = PasswordHasher.HashPassword(user.Password),
-                ProfileUrl = user.ProfileUrl
+                ProfileUrl = user.ProfileUrl ?? "/" + user.Username
             };
 
             _userService.CreateUser(newUser);
@@ -110,28 +111,30 @@ namespace WebServiceLayer.Controllers
             return Ok(results);
         }
 
-        [HttpGet("{id}", Name = nameof(UserDetails))]
-        public IActionResult UserDetails(string id)
+        [HttpGet("{username}", Name = nameof(UserDetails))]
+        public IActionResult UserDetails(string username)
         {
-            if (!Guid.TryParse(id, out var userId))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 return BadRequest(new { message = "INVALID_ID" });
             }
 
-            var user = _userService.GetById(userId);
+            var user = _userService.GetUserByUsername(username);
 
             if (user == null)
             {
                 return NotFound();
             }
-            return Ok(user);
+
+            var userDto = _mapper.Map<UserDTO>(user);
+            return Ok(userDto);
 
         }
 
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)
         {
             var model = _mapper.Map<ReviewWithRating>(rating);
-            model.UserUrl = GetUrl(nameof(UserDetails), new { id = rating.UserId });
+            model.UserUrl = GetUrl(nameof(UserDetails), new { username = rating.Username });
             model.MediaUrl = GetUrl(nameof(MediaController.GetMediaById), new { mediaId = rating.MediaId });
             return model;
         }
