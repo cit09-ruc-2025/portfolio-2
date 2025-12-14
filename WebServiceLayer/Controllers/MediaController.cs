@@ -20,13 +20,15 @@ namespace WebServiceLayer.Controllers
         private readonly IMediaService _mediaService;
         private readonly IReviewService _reviewService;
         private readonly IPeopleService _peopleService;
+        private readonly IEpisodeService _episodeService;
         protected readonly IMapper _mapper;
 
-        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, LinkGenerator generator, IMapper mapper) : base(generator)
+        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
             _peopleService = peopleService;
+            _episodeService = episodeService;
             _mapper = mapper;
         }
 
@@ -34,6 +36,17 @@ namespace WebServiceLayer.Controllers
         public IActionResult GetMediaById([FromRoute] string mediaId)
         {
             var media = _mediaService.GetById(mediaId);
+
+            if (media == null)
+            {
+                return NotFound(new
+                {
+                    errors = new
+                    {
+                        media = "MEDIA_NOT_FOUND"
+                    }
+                });
+            }
 
             return Ok(media);
         }
@@ -92,6 +105,14 @@ namespace WebServiceLayer.Controllers
             return Ok(CreatePaging(nameof(GetPeopleForMedia), dtos, mediaPeopleWithCount.TotalCount, queryParams));
         }
 
+        [HttpGet("{mediaId}/episodes", Name = nameof(GetMediaEpisodes))]
+        public ActionResult<List<EpisodeList>> GetMediaEpisodes(string mediaId)
+        {
+            var mediaEpisodes = _episodeService.GetEpisodeList(mediaId);
+            return Ok(mediaEpisodes);
+
+        }
+
         private ReviewWithRating CreateRatingListModel(ReviewWithRating rating)
         {
             var model = _mapper.Map<ReviewWithRating>(rating);
@@ -101,9 +122,21 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet(Name = nameof(GetMediaList))]
-        public async Task<IActionResult> GetMediaList([FromQuery] QueryParams queryParams)
+        public async Task<IActionResult> GetMediaList([FromQuery] QueryParams queryParams, [FromQuery] string? orderBy = null)
         {
-            var (items, total) = await _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize);
+            var validSort = MediaSortBy.ReleaseYear;
+
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                var pascalCaseSortBy = ToPascalCase(orderBy);
+
+                if (Enum.TryParse<MediaSortBy>(pascalCaseSortBy, ignoreCase: true, out var parsedSort))
+                {
+                    validSort = parsedSort;
+                }
+            }
+
+            var (items, total) = await _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize, validSort);
 
             if (items.Count == 0)
                 return NoContent();
@@ -116,22 +149,21 @@ namespace WebServiceLayer.Controllers
                 ageRating = m.AgeRating,
                 poster = m.Poster,
                 genres = m.Genres.Select(g => g.Name),
-                dvdReleaseDate = m.DvdRelease?.ReleaseDate
+                dvdReleaseDate = m.DvdRelease?.ReleaseDate,
+                episode = m.EpisodeEpisodeMedia,
+                averageRating = m.AverageRating,
+                imdbRating = m.ImdbAverageRating,
+                mediaType = m.MediaType
             });
 
             var result = CreatePaging(nameof(GetMediaList), mapped, total, queryParams);
             return Ok(result);
         }
 
-        [HttpGet("details/{mediaId}")]
-        public IActionResult GetMediaDetails(string mediaId)
+        private string ToPascalCase(string snakeCase)
         {
-            var dto = _mediaService.GetMediaDetails(mediaId);
-
-            if (dto == null) return NotFound();
-
-            return Ok(dto);
+            var parts = snakeCase.Split('_');
+            return string.Concat(parts.Select(p => char.ToUpper(p[0]) + p.Substring(1)));
         }
-
     }
 }

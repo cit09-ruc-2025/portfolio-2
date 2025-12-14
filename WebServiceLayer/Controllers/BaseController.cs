@@ -22,16 +22,16 @@ namespace WebServiceLayer.Controllers
             var numberOfPages = (int)Math.Ceiling((double)numberOfItems / queryParams.PageSize);
 
             var prev = queryParams.Page > 1
-                ? GetUrl(endpointName, new { page = queryParams.Page - 1, queryParams.PageSize }, includeAllRouteValues: true)
+                ? GetUrl(endpointName, new { page = queryParams.Page - 1, pageSize = queryParams.PageSize }, includeAllRouteValues: true)
                 : null;
 
             var next = queryParams.Page < numberOfPages
-                ? GetUrl(endpointName, new { page = queryParams.Page + 1, queryParams.PageSize }, includeAllRouteValues: true)
+                ? GetUrl(endpointName, new { page = queryParams.Page + 1, pageSize = queryParams.PageSize }, includeAllRouteValues: true)
                 : null;
 
-            var first = GetUrl(endpointName, new { page = 1, queryParams.PageSize }, includeAllRouteValues: true);
-            var cur = GetUrl(endpointName, new { queryParams.Page, queryParams.PageSize }, includeAllRouteValues: true);
-            var last = GetUrl(endpointName, new { page = numberOfPages, queryParams.PageSize }, includeAllRouteValues: true);
+            var first = GetUrl(endpointName, new { page = 1, pageSize = queryParams.PageSize }, includeAllRouteValues: true);
+            var cur = GetUrl(endpointName, new { page = queryParams.Page, pageSize = queryParams.PageSize }, includeAllRouteValues: true);
+            var last = GetUrl(endpointName, new { page = numberOfPages, pageSize = queryParams.PageSize }, includeAllRouteValues: true);
 
             return new PaginationResult<T>(
                 first,

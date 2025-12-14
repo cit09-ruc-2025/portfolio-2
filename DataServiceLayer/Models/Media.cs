@@ -7,6 +7,7 @@ namespace DataServiceLayer.Models;
 public partial class Media
 {
     public string Id { get; set; } = null!;
+    public string MediaType { get; set; } = null!;
 
     public int? ReleaseYear { get; set; }
 

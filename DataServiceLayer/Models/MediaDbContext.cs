@@ -349,6 +349,7 @@ public partial class MediaDbContext : DbContext
             entity.Property(e => e.WebsiteUrl)
                 .HasMaxLength(255)
                 .HasColumnName("website_url");
+            entity.Property(e => e.MediaType).HasColumnName("media_type");
 
             entity.HasMany(d => d.Genres).WithMany(p => p.Media)
                 .UsingEntity<Dictionary<string, object>>(
