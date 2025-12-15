@@ -33,9 +33,18 @@ namespace WebServiceLayer.Controllers
 
             if (favorites.TotalCount == 0) return NoContent();
 
-            var dto = _mapper.Map<List<FavoriteMediaDTO>>(favorites.FavoriteMedia);
+            var dtos = favorites.FavoriteMedia.Select(mp =>
+           {
+               var dto = _mapper.Map<FavoriteMediaDTO>(mp);
 
-            return Ok(CreatePaging(nameof(GetFavoriteMedia), dto, favorites.TotalCount, queryParams));
+               dto.Title = mp.Media?.Titles.OrderBy(x => x.Ordering)?.FirstOrDefault()?.Title1;
+               dto.ImdbRating = mp.Media?.ImdbAverageRating;
+               dto.ReleaseYear = mp.Media?.ReleaseYear;
+
+               return dto;
+           }).ToList();
+
+            return Ok(CreatePaging(nameof(GetFavoriteMedia), dtos, favorites.TotalCount, queryParams));
         }
 
         [HttpPost]

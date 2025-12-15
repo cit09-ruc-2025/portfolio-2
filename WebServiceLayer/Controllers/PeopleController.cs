@@ -66,7 +66,7 @@ namespace WebServiceLayer.Controllers
         {
             var userId = Guid.Parse(User.FindFirst("id")!.Value);
 
-            var isPeopleFavorite = _favoriteService.IsMediaFavorite(peopleId, userId);
+            var isPeopleFavorite = _favoriteService.IsPeopleFavorite(peopleId, userId);
 
             var peopleUserStatus = new PeopleUserStatus
             {

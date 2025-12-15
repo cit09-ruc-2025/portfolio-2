@@ -33,9 +33,17 @@ namespace WebServiceLayer.Controllers
 
             if (favorites.TotalCount == 0) return NoContent();
 
-            var dto = _mapper.Map<List<FavoritePeopleDTO>>(favorites.FavoritePeople);
+            var dtos = favorites.FavoritePeople.Select(mp =>
+          {
+              var dto = _mapper.Map<FavoritePeopleDTO>(mp);
 
-            return Ok(CreatePaging(nameof(GetFavoritePeople), dto, favorites.TotalCount, queryParams));
+              dto.Name = mp.People.Name;
+
+              return dto;
+          }).ToList();
+
+
+            return Ok(CreatePaging(nameof(GetFavoritePeople), dtos, favorites.TotalCount, queryParams));
         }
 
         [HttpPost]
@@ -52,7 +60,7 @@ namespace WebServiceLayer.Controllers
         {
             var success = _favoriteService.UnfavoritePerson(userId, peopleId);
             if (!success) return StatusCode(500, "Failed while removing from favorites");
-            return NoContent();
+            return Ok(new { message = "deleted" });
         }
 
         private string? GetUrl(string endpointName, object values)
