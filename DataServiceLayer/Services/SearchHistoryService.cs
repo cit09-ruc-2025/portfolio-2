@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataServiceLayer.Dtos;
+using DataServiceLayer.Helpers;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 
@@ -53,15 +55,15 @@ namespace DataServiceLayer.Services
             db.SaveChanges();
         }
 
-        public IList<SearchHistory> List(Guid userId)
+        public (List<SearchHistory>, int count) List(Guid userId, int page, int pageSize)
         {
             var db = new MediaDbContext(_connectionString);
 
-            var searchList = db.SearchHistories
-                .Where(x => x.UserId == userId)
-                .ToList();
+            return db.SearchHistories
+                 .Where(x => x.UserId == userId)
+                 .OrderByDescending(x => x.CreatedAt)
+                 .GetPaginatedResult(page, pageSize);
 
-            return searchList;
         }
     }
 }

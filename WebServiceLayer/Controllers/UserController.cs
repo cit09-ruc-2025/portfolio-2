@@ -112,7 +112,7 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet("{username}", Name = nameof(UserDetails))]
-        public IActionResult UserDetails(string username)
+        public IActionResult UserDetails([FromRoute] string username)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
