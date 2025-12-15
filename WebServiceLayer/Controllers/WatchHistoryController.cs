@@ -45,15 +45,18 @@ namespace WebServiceLayer.Controllers
             var success = _mediaService.AddToWatched(request.MediaId, userId);
             if (!success) return BadRequest("Failed while adding to WatchHistory");
             var location = GetUrl(nameof(Get), new { userId });
-            return Created(location!, null);
+            return Created(location!, new
+            {
+                message = "created"
+            });
         }
 
-        [HttpDelete("mediaId")]
-        public ActionResult Delete(Guid userId, string mediaId)
+        [HttpDelete("{mediaId}")]
+        public ActionResult Delete(Guid userId, [FromRoute] string mediaId)
         {
             var success = _mediaService.RemoveFromWatched(mediaId, userId);
             if (!success) return BadRequest("Failed while removing from WatchHistory");
-            return NoContent();
+            return Ok(new { message = "removed" });
         }
 
         private string? GetUrl(string endpointName, object values)

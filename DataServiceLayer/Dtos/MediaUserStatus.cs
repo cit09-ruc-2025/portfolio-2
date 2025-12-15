@@ -10,6 +10,7 @@ namespace DataServiceLayer.Dtos
 
         public bool IsReviewed { get; set; }
         public bool IsFavorite { get; set; }
+        public bool IsWatched { get; set; }
 
     }
 }

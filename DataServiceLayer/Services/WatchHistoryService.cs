@@ -58,5 +58,11 @@ namespace DataServiceLayer.Services
 
             return true;
         }
+        public bool IsWatched(string mediaId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.WatchHistories.Any(x => x.MediaId == mediaId && x.UserId == userId);
+        }
     }
 }
