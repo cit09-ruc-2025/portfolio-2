@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataServiceLayer.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataServiceLayer.Services
 {
@@ -22,7 +23,7 @@ namespace DataServiceLayer.Services
         {
             var context = CreateContext();
 
-            var baseQuery = context.WatchHistories.Where(wh => wh.UserId == userGuid);
+            var baseQuery = context.WatchHistories.Where(wh => wh.UserId == userGuid).Include(x => x.Media).ThenInclude(x => x.Titles).OrderBy(x => x.CreatedAt);
             return baseQuery.GetPaginatedResult(pageNumber, pageSize);
         }
 

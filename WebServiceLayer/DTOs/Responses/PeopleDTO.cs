@@ -13,7 +13,5 @@
         public string? Description { get; set; }
 
         public decimal? NameRating { get; set; }
-
-        public List<MediaDTO> KnownFor { get; set; } = new();
     }
 }

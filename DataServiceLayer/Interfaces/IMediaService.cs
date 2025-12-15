@@ -13,5 +13,7 @@ namespace DataServiceLayer.Interfaces
                 public Task UpdateMediaRating(string id, MediaDbContext db);
                 Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize, MediaSortBy sortBy = MediaSortBy.ReleaseYear);
                 public PaginatedResult<MediaList> GetByTitle(string title, int page, int pageSize);
+                public (List<MediaPerson> PeopleMedia, int TotalCount) GetMediaForPeople(string peopleId, int page, int pageSize);
+
         }
 }

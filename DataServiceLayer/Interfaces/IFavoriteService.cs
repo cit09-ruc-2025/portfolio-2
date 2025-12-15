@@ -16,6 +16,7 @@ namespace DataServiceLayer.Interfaces
         bool UnfavoriteMedia(Guid userId, string mediaId);
         (List<FavoriteMedia> FavoriteMedia, int TotalCount) GetFavoriteMedia(Guid userId, int pageNumber, int pageSize);
         public bool IsMediaFavorite(string mediaId, Guid userId);
+        public bool IsPeopleFavorite(string peopleId, Guid userId);
 
 
     }

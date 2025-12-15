@@ -44,15 +44,15 @@ namespace WebServiceLayer.Controllers
             var success = _favoriteService.FavoriteMedia(userId, request.MediaId);
             if (!success) return BadRequest("Failed while adding to favorites");
             var location = GetUrl(nameof(GetFavoriteMedia), new { userId });
-            return Created(location!, null);
+            return Created(location!, new { message = "added" });
         }
 
-        [HttpDelete("mediaId")]
-        public ActionResult Delete(Guid userId, string mediaId)
+        [HttpDelete("{mediaId}")]
+        public ActionResult Delete([FromRoute] Guid userId, string mediaId)
         {
             var success = _favoriteService.UnfavoriteMedia(userId, mediaId);
             if (!success) return StatusCode(500, "Failed while removing from favorites");
-            return NoContent();
+            return Ok(new { message = "deleted" });
         }
 
         private string? GetUrl(string endpointName, object values)

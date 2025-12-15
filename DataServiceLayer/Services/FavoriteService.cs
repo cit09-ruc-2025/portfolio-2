@@ -116,5 +116,11 @@ namespace DataServiceLayer.Services
 
             return db.FavoriteMedia.Any(x => x.MediaId == mediaId && x.UserId == userId);
         }
+        public bool IsPeopleFavorite(string peopleId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.FavoritePeople.Any(x => x.PeopleId == peopleId && x.UserId == userId);
+        }
     }
 }

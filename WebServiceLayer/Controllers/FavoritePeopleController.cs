@@ -44,11 +44,11 @@ namespace WebServiceLayer.Controllers
             var success = _favoriteService.FavoritePerson(userId, request.PeopleId);
             if (!success) return BadRequest("Failed while adding to favorites");
             var location = GetUrl(nameof(GetFavoritePeople), new { userId });
-            return Created(location!, null);
+            return Created(location!, new { message = "added" });
         }
 
-        [HttpDelete("peopleId")]
-        public ActionResult Delete(Guid userId, string peopleId)
+        [HttpDelete("{peopleId}")]
+        public ActionResult Delete([FromRoute] Guid userId, string peopleId)
         {
             var success = _favoriteService.UnfavoritePerson(userId, peopleId);
             if (!success) return StatusCode(500, "Failed while removing from favorites");
