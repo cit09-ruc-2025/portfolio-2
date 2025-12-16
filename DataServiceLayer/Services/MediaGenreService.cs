@@ -17,11 +17,16 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public List<Media> GetMediaByGenre(string genreName, int pageNumber = 1, int pageSize = 10)
+        public List<Media> GetMediaByGenre(Guid genreGuid, int pageNumber = 1, int pageSize = 10)
         {
-            var result = _db.Media.Include(m => m.Genres)
+            var result = _db.Genres.Where(g => g.Id == genreGuid)
+                .Include(g => g.Media)
+                .SelectMany(g => g.Media)
                 .Include(m => m.Titles)
-                .Where(m => m.Genres.Any(g => g.Name.ToLower() == genreName.ToLower()))
+                .Where(m => !m.EpisodeEpisodeMedia.Any())
+                .OrderByDescending(m => m.ImdbNumberOfVotes ?? 0)
+                .ThenByDescending(m => m.ImdbAverageRating ?? 0)
+                .ThenByDescending(m => m.Id)
                 .ApplyPagination(pageNumber, pageSize)
                 .ToList();
 
