@@ -34,9 +34,18 @@ namespace WebServiceLayer.Controllers
             var watched = _mediaService.GetWatchHistory(userId, queryParams.Page, queryParams.PageSize);
 
             if (watched.TotalCount == 0) return NoContent();
-            var dto = _mapper.Map<List<WatchHistoryDTO>>(watched.WatchHistory);
 
-            return Ok(CreatePaging(nameof(Get), dto, watched.TotalCount, queryParams));
+            var dtos = watched.WatchHistory.Select(wh =>
+            {
+                var dto = _mapper.Map<WatchHistoryDTO>(wh);
+
+                dto.ImdbAverageRating = wh.Media.ImdbAverageRating;
+                dto.Title = wh.Media?.Titles?.OrderBy(x => x.Ordering).FirstOrDefault()?.Title1 ?? "";
+                dto.ReleaseYear = wh.Media?.ReleaseYear;
+
+                return dto;
+            }).ToList();
+            return Ok(CreatePaging(nameof(Get), dtos, watched.TotalCount, queryParams));
         }
 
         [HttpPost]
@@ -45,15 +54,18 @@ namespace WebServiceLayer.Controllers
             var success = _mediaService.AddToWatched(request.MediaId, userId);
             if (!success) return BadRequest("Failed while adding to WatchHistory");
             var location = GetUrl(nameof(Get), new { userId });
-            return Created(location!, null);
+            return Created(location!, new
+            {
+                message = "created"
+            });
         }
 
-        [HttpDelete("mediaId")]
-        public ActionResult Delete(Guid userId, string mediaId)
+        [HttpDelete("{mediaId}")]
+        public ActionResult Delete(Guid userId, [FromRoute] string mediaId)
         {
             var success = _mediaService.RemoveFromWatched(mediaId, userId);
             if (!success) return BadRequest("Failed while removing from WatchHistory");
-            return NoContent();
+            return Ok(new { message = "removed" });
         }
 
         private string? GetUrl(string endpointName, object values)

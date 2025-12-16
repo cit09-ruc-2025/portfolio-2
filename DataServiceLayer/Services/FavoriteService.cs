@@ -1,6 +1,7 @@
 ﻿using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using DataServiceLayer.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataServiceLayer.Services
 {
@@ -101,13 +102,26 @@ namespace DataServiceLayer.Services
         public (List<FavoritePerson> FavoritePeople, int TotalCount) GetFavoritePeople(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            return context.FavoritePeople.Where(fp => fp.UserId == userId).GetPaginatedResult(pageNumber, pageSize);
+            return context.FavoritePeople.Where(fp => fp.UserId == userId).Include(x => x.People).GetPaginatedResult(pageNumber, pageSize);
         }
 
         public (List<FavoriteMedia> FavoriteMedia, int TotalCount) GetFavoriteMedia(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            return context.FavoriteMedia.Where(fp => fp.UserId == userId).GetPaginatedResult(pageNumber, pageSize);
+            return context.FavoriteMedia.Where(fp => fp.UserId == userId).Include(x => x.Media).ThenInclude(x => x.Titles).GetPaginatedResult(pageNumber, pageSize);
+        }
+
+        public bool IsMediaFavorite(string mediaId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.FavoriteMedia.Any(x => x.MediaId == mediaId && x.UserId == userId);
+        }
+        public bool IsPeopleFavorite(string peopleId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.FavoritePeople.Any(x => x.PeopleId == peopleId && x.UserId == userId);
         }
     }
 }

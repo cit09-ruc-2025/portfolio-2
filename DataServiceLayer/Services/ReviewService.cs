@@ -135,37 +135,47 @@ namespace DataServiceLayer.Services
 
         }
 
-        public PaginatedResult<ReviewWithRating> GetByMediaId(string mediaId, int page, int pageSize)
+        public PaginatedResult<ReviewWithRating> GetByMediaId(string mediaId, int page, int pageSize, Guid? userId)
         {
             var db = new MediaDbContext(_connectionString);
 
-            var query = from ratings in db.Ratings
-                        join user in db.Users on ratings.UserId equals user.Id
-                        join reviews in db.Reviews
-                        on new { ratings.MediaId, ratings.UserId }
-                        equals new { reviews.MediaId, reviews.UserId } into ratingWithReview
-                        from reviews in ratingWithReview.DefaultIfEmpty()
-                        where ratings.MediaId == mediaId
-                        select new { ratings, reviews, user };
+            var query = db.Ratings
+                        .Where(r => r.MediaId == mediaId)
+                        .Include(r => r.User)
+                        .Include(r => r.Review);
+
+            var total = query.Count();
+
+            var items = query
+                        .OrderByDescending(r => r.Review != null ? r.Review.CreatedAt : r.CreatedAt)
+                        .Skip((page - 1) * pageSize)
+                        .Take(pageSize)
+                        .Select(r => new ReviewWithRating
+                        {
+                            MediaId = r.MediaId,
+                            UserId = r.User.Id,
+                            Username = r.User.Username ?? "",
+                            UserProfile = r.User.ProfileUrl ?? "",
+                            Rating = r.Rating1 ?? 0,
+                            Review = r.Review != null ? r.Review.ReviewText : "",
+                            CreatedAt = r.Review != null ? r.Review.CreatedAt : r.CreatedAt
+                        })
+                        .ToList();
+
+            if (userId.HasValue)
+            {
+                var userReview = items.FirstOrDefault(x => x.UserId == userId.Value);
+                if (userReview != null)
+                {
+                    items.Remove(userReview);
+                    items.Insert(0, userReview);
+                }
+            }
 
             var result = new PaginatedResult<ReviewWithRating>
             {
-                Total = query.Count(),
-                Items = query
-                    .OrderByDescending(x => x.reviews != null ? x.reviews.CreatedAt : x.ratings.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(x => new ReviewWithRating
-                    {
-                        MediaId = x.ratings.MediaId,
-                        UserId = x.user.Id,
-                        Username = x.user.Username ?? "",
-                        UserProfile = x.user.ProfileUrl ?? "",
-                        Rating = x.ratings.Rating1 ?? 0,
-                        Review = x.reviews != null ? x.reviews.ReviewText : null,
-                        CreatedAt = x.reviews != null ? x.reviews.CreatedAt : x.ratings.CreatedAt
-                    })
-                    .ToList()
+                Total = total,
+                Items = items
             };
 
             return result;
@@ -206,5 +216,13 @@ namespace DataServiceLayer.Services
 
             return result;
         }
+
+        public bool HasUserReviewed(string mediaId, Guid userId)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            return db.Ratings.Any(x => x.MediaId == mediaId && x.UserId == userId);
+        }
+
     }
 }

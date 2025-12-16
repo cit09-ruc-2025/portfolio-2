@@ -33,14 +33,14 @@ namespace WebServiceLayer.Controllers
 
             if (user == null)
             {
-                return BadRequest(new { message = "INVALID_CREDENTIALS" });
+                return BadRequest(new { message = "Invalid Credentials" });
             }
 
             var PasswordHasher = new PasswordHasher();
 
             if (!PasswordHasher.VerifyPassword(loginData.Password, user.HashedPassword))
             {
-                return BadRequest(new { message = "INVALID_CREDENTIALS" });
+                return BadRequest(new { message = "Invalid Credentials" });
             }
 
             var claims = new List<Claim>
@@ -66,6 +66,7 @@ namespace WebServiceLayer.Controllers
             return Ok(new
             {
                 username = user.Username,
+                userId = user.Id,
                 token = jwtToken
             });
 

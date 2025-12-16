@@ -11,5 +11,7 @@ namespace DataServiceLayer.Interfaces
         (List<Models.WatchHistory> WatchHistory, int TotalCount) GetWatchHistory(Guid userGuid, int pageNumber, int pageSize);
         bool AddToWatched(string mediaId, Guid userGuid);
         bool RemoveFromWatched(string mediaId, Guid userGuid);
+        public bool IsWatched(string mediaId, Guid userId);
+
     }
 }

@@ -38,14 +38,14 @@ namespace WebServiceLayer.Controllers
 
             if (emailExists)
             {
-                validationErrors.Add("email", "EMAIL_EXISTS");
+                validationErrors.Add("email", "Email already exists");
             }
 
             bool usernameExists = _userService.GetUserByUsername(user.Username) != null;
 
             if (usernameExists)
             {
-                validationErrors.Add("username", "USERNAME_EXISTS");
+                validationErrors.Add("username", "Username already exists");
 
             }
 
@@ -112,7 +112,7 @@ namespace WebServiceLayer.Controllers
         }
 
         [HttpGet("{username}", Name = nameof(UserDetails))]
-        public IActionResult UserDetails(string username)
+        public IActionResult UserDetails([FromRoute] string username)
         {
             if (string.IsNullOrWhiteSpace(username))
             {

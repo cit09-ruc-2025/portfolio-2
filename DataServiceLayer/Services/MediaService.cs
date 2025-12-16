@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataServiceLayer.Dtos;
+using DataServiceLayer.Helpers;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using Microsoft.EntityFrameworkCore;
@@ -136,8 +137,8 @@ namespace DataServiceLayer.Services
                     Title = m.Titles
                     .OrderBy(t => t.Ordering)
                     .Select(t => t.Title1)
-                    .FirstOrDefault(),
-                    Poster = m.Poster,
+                    .FirstOrDefault() ?? "",
+                    Poster = m.Poster ?? "",
                     ReleaseYear = m.ReleaseYear ?? 0,
                     ImdbRating = m.ImdbAverageRating ?? 0
 
@@ -146,5 +147,19 @@ namespace DataServiceLayer.Services
             };
             return result;
         }
+        public (List<MediaPerson> PeopleMedia, int TotalCount) GetMediaForPeople(string peopleId, int page, int pageSize)
+        {
+            var db = new MediaDbContext(_connectionString);
+
+            var baseQuery = db.MediaPeople
+                .Include(p => p.Media)
+                .ThenInclude(p => p.Titles)
+                .Where(mp => mp.PeopleId == peopleId)
+                .Where(mp => !mp.Media.EpisodeEpisodeMedia.Any())
+                .OrderBy(mp => mp.Ordering);
+
+            return baseQuery.GetPaginatedResult(page, pageSize);
+        }
     }
+
 }

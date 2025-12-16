@@ -7,6 +7,7 @@ using DataServiceLayer.DTOs;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebServiceLayer.DTOs.Responses;
 using WebServiceLayer.Models;
@@ -21,14 +22,18 @@ namespace WebServiceLayer.Controllers
         private readonly IReviewService _reviewService;
         private readonly IPeopleService _peopleService;
         private readonly IEpisodeService _episodeService;
+        private readonly IFavoriteService _favoriteService;
+        private readonly IWatchHistoryService _watchHistoryService;
         protected readonly IMapper _mapper;
 
-        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, LinkGenerator generator, IMapper mapper) : base(generator)
+        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, IFavoriteService favoriteService, IWatchHistoryService watchHistoryService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
             _peopleService = peopleService;
             _episodeService = episodeService;
+            _favoriteService = favoriteService;
+            _watchHistoryService = watchHistoryService;
             _mapper = mapper;
         }
 
@@ -43,7 +48,7 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        media = "MEDIA_NOT_FOUND"
+                        media = "Media does not exist"
                     }
                 });
             }
@@ -63,13 +68,22 @@ namespace WebServiceLayer.Controllers
                 {
                     errors = new
                     {
-                        media = "MEDIA_NOT_FOUND"
+                        media = "Media does not exist"
                     }
                 });
             }
 
+            Guid? userId = null;
+
+            var claim = User.FindFirst("id")?.Value;
+            if (!string.IsNullOrEmpty(claim))
+            {
+                userId = Guid.Parse(claim);
+            }
+
+
             var ratings = _reviewService
-                .GetByMediaId(mediaId, queryParams.Page, queryParams.PageSize);
+                .GetByMediaId(mediaId, queryParams.Page, queryParams.PageSize, userId);
 
             var mappedRatings = ratings.Items
             .Select(x => CreateRatingListModel(x));
@@ -110,6 +124,29 @@ namespace WebServiceLayer.Controllers
         {
             var mediaEpisodes = _episodeService.GetEpisodeList(mediaId);
             return Ok(mediaEpisodes);
+
+        }
+
+        [Authorize]
+        [HttpGet("{mediaId}/user-status")]
+        public ActionResult<MediaUserStatus> GetMediaUserStatus(string mediaId)
+        {
+            var userId = Guid.Parse(User.FindFirst("id")!.Value);
+
+            var userHasMediaReview = _reviewService.HasUserReviewed(mediaId, userId);
+
+            var isMediaFavorite = _favoriteService.IsMediaFavorite(mediaId, userId);
+
+            var isMediaWatched = _watchHistoryService.IsWatched(mediaId, userId);
+
+            var mediaUserStatus = new MediaUserStatus
+            {
+                IsFavorite = isMediaFavorite,
+                IsReviewed = userHasMediaReview,
+                IsWatched = isMediaWatched
+            };
+
+            return Ok(mediaUserStatus);
 
         }
 

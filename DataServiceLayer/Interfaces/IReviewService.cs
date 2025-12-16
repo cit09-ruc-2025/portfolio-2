@@ -13,7 +13,9 @@ namespace DataServiceLayer.Interfaces
         public Task UpsertReview(ReviewParam review);
         public Rating? GetRatingById(string mediaId, Guid userId);
         public Task DeleteReview(Rating rating);
-        public PaginatedResult<ReviewWithRating> GetByMediaId(string mediaId, int page, int pageSize);
+        public PaginatedResult<ReviewWithRating> GetByMediaId(string mediaId, int page, int pageSize, Guid? userId);
         public PaginatedResult<ReviewWithRating> GetByUserId(Guid userId, int page, int pageSize);
+        public bool HasUserReviewed(string mediaId, Guid userId);
+
     }
 }
