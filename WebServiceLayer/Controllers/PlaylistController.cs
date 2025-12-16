@@ -86,7 +86,16 @@ namespace WebServiceLayer.Controllers
         [HttpGet("user/{userId}")]
         public IActionResult GetPlaylistsByUserId(Guid userId)
         {
-            var playlists = _playlistService.GetPlaylistsByUserId(userId);
+            Guid? loggedUserId = null;
+
+            var idClaim = User.FindFirst("id")?.Value;
+
+            if (Guid.TryParse(idClaim, out var parsedId))
+            {
+                loggedUserId = parsedId;
+            }
+
+            var playlists = _playlistService.GetPlaylistsByUserId(userId, loggedUserId);
             var dto = playlists.Select(MapToDTO).ToList();
             return Ok(dto);
         }
@@ -94,10 +103,21 @@ namespace WebServiceLayer.Controllers
         [HttpGet("{playlistId}")]
         public IActionResult GetPlaylistsByPlaylistId(Guid playlistId)
         {
-            var playlist = _playlistService.GetPlaylistByPlaylistId(playlistId);
+            Guid? loggedUserId = null;
+
+            var idClaim = User.FindFirst("id")?.Value;
+
+            if (Guid.TryParse(idClaim, out var parsedId))
+            {
+                loggedUserId = parsedId;
+            }
+
+            var playlist = _playlistService.GetPlaylistDetailByPlaylistId(playlistId, loggedUserId);
 
             if (playlist == null) return NotFound();
+
             var dto = MapToDTO(playlist);
+
             return Ok(dto);
         }
 
@@ -120,7 +140,7 @@ namespace WebServiceLayer.Controllers
             var mediaDtoList = playlist.Media.Select(m => new MediaDTO
             {
                 Id = m.Id,
-                DisplayTitle = m.DisplayTitle,
+                DisplayTitle = m.Titles?.OrderBy(x => x.Ordering)?.FirstOrDefault()?.Title1,
                 ReleaseYear = m.ReleaseYear,
                 AgeRating = m.AgeRating,
                 Poster = m.Poster,
@@ -128,7 +148,14 @@ namespace WebServiceLayer.Controllers
                 ImdbAverageRating = m.ImdbAverageRating,
             }).ToList();
 
+            var peopleDtoList = playlist.People.Select(m => new PeopleDTO
+            {
+                Id = m.Id,
+                Name = m.Name
+            }).ToList();
+
             playlistDto.Media = mediaDtoList;
+            playlistDto.People = peopleDtoList;
             return playlistDto;
         }
     }

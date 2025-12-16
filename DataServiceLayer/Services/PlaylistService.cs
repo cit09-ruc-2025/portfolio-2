@@ -108,21 +108,30 @@ namespace DataServiceLayer.Services
             return true;
         }
 
-        public List<UserList> GetPlaylistsByUserId(Guid userId)
+        public List<UserList> GetPlaylistsByUserId(Guid userId, Guid? loggedUserId)
         {
-            return _db.Lists
+            IQueryable<UserList> playlist = _db.Lists
                 .Where(p => p.UserId == userId)
                 .Include(p => p.User)
                 .Include(p => p.People)
                 .Include(p => p.Media)
-                .ThenInclude(m => m.Titles)
-                .ToList();
+                .ThenInclude(m => m.Titles);
+
+            if (loggedUserId == null || loggedUserId != userId)
+            {
+
+                playlist = playlist.Where(p => p.IsPublic);
+
+            }
+
+            return playlist.ToList();
         }
 
-        public UserList? GetPlaylistByPlaylistId(Guid playlistId)
+        public UserList? GetPlaylistDetailByPlaylistId(Guid playlistId, Guid? loggedUserId)
         {
             return _db.Lists
-                .Where(p => p.Id == playlistId)
+                .Where(p => p.Id == playlistId &&
+                    (p.IsPublic || p.UserId == loggedUserId))
                 .Include(p => p.User)
                 .Include(p => p.People)
                 .Include(p => p.Media)
