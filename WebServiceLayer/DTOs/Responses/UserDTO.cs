@@ -4,6 +4,6 @@ namespace WebServiceLayer.DTOs.Responses
     {
         public Guid Id { get; set; }
         public string Username { get; set; } = null!;
-        public string CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 }
