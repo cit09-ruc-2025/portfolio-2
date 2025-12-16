@@ -11,5 +11,7 @@ namespace WebServiceLayer.DTOs.Requests
 
         [MaxLength(500, ErrorMessage = "DESCRIPTION_MAX_LENGTH_EXCEEDED")]
         public string? Description { get; set; }
+
+        public bool IsPublic { get; set; }
     }
 }

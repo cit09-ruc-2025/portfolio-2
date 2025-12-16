@@ -16,19 +16,14 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public UserList CreatePlaylist(Guid currentUserId, string title, string? description)
+        public UserList CreatePlaylist(Guid currentUserId, string title, string? description, bool isPublic)
         {
-            var existingUser = _db.Users.FirstOrDefault(u => u.Id == currentUserId);
-            if (existingUser == null) throw new Exception("User does not exist.");
-
             var playlist = new UserList
             {
-                Id = Guid.NewGuid(),
                 UserId = currentUserId,
                 Title = title,
                 Description = description,
-                CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
-                UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)
+                IsPublic = isPublic
             };
 
             _db.Lists.Add(playlist);
@@ -36,14 +31,30 @@ namespace DataServiceLayer.Services
             return playlist;
         }
 
+        public UserList? UpdatePlaylist(Guid currentUserId, Guid playlistId, string title, string? description, bool isPublic)
+        {
+            var playlist = _db.Lists
+                .FirstOrDefault(l => l.Id == playlistId && l.UserId == currentUserId);
+
+            if (playlist == null)
+                return null;
+
+            playlist.Title = title;
+            playlist.Description = description;
+            playlist.IsPublic = isPublic;
+
+            _db.SaveChanges();
+            return playlist;
+        }
+
+
         public bool AddItemToPlaylist(Guid listId, string itemId, bool isMedia, Guid currentUserId)
         {
             var list = _db.Lists.Include(l => l.Media)
                                 .Include(l => l.People)
                                 .FirstOrDefault(l => l.Id == listId);
-            if (list == null || list.UserId != currentUserId) return false;
 
-            list.UpdatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+            if (list == null || list.UserId != currentUserId) return false;
 
             if (isMedia)
             {
@@ -117,6 +128,26 @@ namespace DataServiceLayer.Services
                 .Include(p => p.Media)
                 .ThenInclude(m => m.Titles)
                 .FirstOrDefault();
+        }
+
+        public List<Guid> IsMediaInPlaylists(string mediaId, Guid userId)
+        {
+            var userPlaylists = _db.Lists
+                .Include(l => l.Media)
+                .Where(l => l.UserId == userId && l.Media.Any(m => m.Id == mediaId))
+                .Select(x => x.Id)
+                .ToList();
+            return userPlaylists;
+        }
+
+        public List<Guid> IsPeopleInPlaylists(string peopleId, Guid userId)
+        {
+            var userPlaylists = _db.Lists
+                .Include(l => l.Media)
+                .Where(l => l.UserId == userId && l.People.Any(m => m.Id == peopleId))
+                .Select(x => x.Id)
+                .ToList();
+            return userPlaylists;
         }
     }
 }

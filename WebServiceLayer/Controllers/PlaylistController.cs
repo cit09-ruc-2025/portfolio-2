@@ -20,7 +20,7 @@ namespace WebServiceLayer.Controllers
             _playlistService = playlistService;
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize]
         public IActionResult CreatePlaylist([FromBody] CreatePlaylistDTO request)
         {
@@ -28,7 +28,19 @@ namespace WebServiceLayer.Controllers
             if (userIdClaim == null) return Unauthorized();
 
             var currentUserId = Guid.Parse(userIdClaim.Value);
-            var playlist = _playlistService.CreatePlaylist(currentUserId, request.Title, request.Description);
+            var playlist = _playlistService.CreatePlaylist(currentUserId, request.Title, request.Description, request.IsPublic);
+            return Ok(playlist);
+        }
+
+        [HttpPut("{playlistId}")]
+        [Authorize]
+        public IActionResult UpdatePlaylist([FromRoute] Guid playlistId, [FromBody] CreatePlaylistDTO request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            if (userIdClaim == null) return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var playlist = _playlistService.UpdatePlaylist(currentUserId, playlistId, request.Title, request.Description, request.IsPublic);
             return Ok(playlist);
         }
 
@@ -45,15 +57,15 @@ namespace WebServiceLayer.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{playlistId}/remove")]
+        [HttpDelete("{playlistId}/remove/{itemId}")]
         [Authorize]
-        public IActionResult RemoveItemFromPlaylist(Guid playlistId, [FromBody] AddItemToPlaylistDTO request)
+        public IActionResult RemoveItemFromPlaylist([FromRoute] Guid playlistId, string itemId, [FromQuery] bool isMedia)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
             if (userIdClaim == null) return Unauthorized();
 
             var currentUserId = Guid.Parse(userIdClaim.Value);
-            var result = _playlistService.RemoveItemFromPlaylist(playlistId, request.ItemId, request.IsMedia, currentUserId);
+            var result = _playlistService.RemoveItemFromPlaylist(playlistId, itemId, isMedia, currentUserId);
             if (!result) return BadRequest(new { message = "Failed to remove item" });
             return Ok(result);
         }

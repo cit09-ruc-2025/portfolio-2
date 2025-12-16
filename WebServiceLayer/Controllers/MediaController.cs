@@ -24,9 +24,10 @@ namespace WebServiceLayer.Controllers
         private readonly IEpisodeService _episodeService;
         private readonly IFavoriteService _favoriteService;
         private readonly IWatchHistoryService _watchHistoryService;
+        private readonly IPlaylistService _playlistService;
         protected readonly IMapper _mapper;
 
-        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, IFavoriteService favoriteService, IWatchHistoryService watchHistoryService, LinkGenerator generator, IMapper mapper) : base(generator)
+        public MediaController(IMediaService mediaService, IReviewService reviewService, IPeopleService peopleService, IEpisodeService episodeService, IFavoriteService favoriteService, IWatchHistoryService watchHistoryService, IPlaylistService playlistService, LinkGenerator generator, IMapper mapper) : base(generator)
         {
             _mediaService = mediaService;
             _reviewService = reviewService;
@@ -34,6 +35,7 @@ namespace WebServiceLayer.Controllers
             _episodeService = episodeService;
             _favoriteService = favoriteService;
             _watchHistoryService = watchHistoryService;
+            _playlistService = playlistService;
             _mapper = mapper;
         }
 
@@ -139,11 +141,14 @@ namespace WebServiceLayer.Controllers
 
             var isMediaWatched = _watchHistoryService.IsWatched(mediaId, userId);
 
+            var playlists = _playlistService.IsMediaInPlaylists(mediaId, userId);
+
             var mediaUserStatus = new MediaUserStatus
             {
                 IsFavorite = isMediaFavorite,
                 IsReviewed = userHasMediaReview,
-                IsWatched = isMediaWatched
+                IsWatched = isMediaWatched,
+                Playlists = playlists
             };
 
             return Ok(mediaUserStatus);
