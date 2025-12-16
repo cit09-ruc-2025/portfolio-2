@@ -11,6 +11,7 @@ namespace WebServiceLayer.DTOs.Responses
         public DateTime UpdatedAt { get; set; }
         public UserDTO User { get; set; } = null!;
         public List<string> MediaIds { get; set; } = new();
+        public List<MediaDTO> Media { get; set; }
         public List<string> PeopleIds { get; set; } = new();
     }
 

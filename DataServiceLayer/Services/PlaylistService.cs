@@ -107,5 +107,16 @@ namespace DataServiceLayer.Services
                 .ThenInclude(m => m.Titles)
                 .ToList();
         }
+
+        public UserList? GetPlaylistByPlaylistId(Guid playlistId)
+        {
+            return _db.Lists
+                .Where(p => p.Id == playlistId)
+                .Include(p => p.User)
+                .Include(p => p.People)
+                .Include(p => p.Media)
+                .ThenInclude(m => m.Titles)
+                .FirstOrDefault();
+        }
     }
 }

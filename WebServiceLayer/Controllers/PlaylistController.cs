@@ -79,9 +79,19 @@ namespace WebServiceLayer.Controllers
             return Ok(dto);
         }
 
+        [HttpGet("{playlistId}")]
+        public IActionResult GetPlaylistsByPlaylistId(Guid playlistId)
+        {
+            var playlist = _playlistService.GetPlaylistByPlaylistId(playlistId);
+
+            if (playlist == null) return NotFound();
+            var dto = MapToDTO(playlist);
+            return Ok(dto);
+        }
+
         private PlaylistDTO MapToDTO(UserList playlist)
         {
-            return new PlaylistDTO
+            var playlistDto = new PlaylistDTO
             {
                 Id = playlist.Id,
                 UserId = playlist.UserId!.Value,
@@ -94,6 +104,20 @@ namespace WebServiceLayer.Controllers
                 PeopleIds = playlist.People.Select(p => p.Id).ToList(),
                 User = new UserDTO { Id = playlist.User.Id, Username = playlist.User.Username }
             };
+
+            var mediaDtoList = playlist.Media.Select(m => new MediaDTO
+            {
+                Id = m.Id,
+                DisplayTitle = m.DisplayTitle,
+                ReleaseYear = m.ReleaseYear,
+                AgeRating = m.AgeRating,
+                Poster = m.Poster,
+                AverageRating = m.AverageRating,
+                ImdbAverageRating = m.ImdbAverageRating,
+            }).ToList();
+
+            playlistDto.Media = mediaDtoList;
+            return playlistDto;
         }
     }
 }
