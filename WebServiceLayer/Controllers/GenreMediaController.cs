@@ -18,24 +18,25 @@ namespace WebServicesLayer.Controllers
             _genreMediaService = genreMediaService;
         }
 
-        [HttpGet("{genreName}")]
-        public IActionResult GetMediaByGenre(string genreName, int page = 1, int pageSize = 10)
+        [HttpGet("{genreGuid}", Name = nameof(GetMediaByGenre))]
+        public IActionResult GetMediaByGenre(Guid genreGuid, [FromQuery] QueryParams queryParams)
         {
-            var mediaList = _genreMediaService.GetMediaByGenre(genreName, page, pageSize);
+            var mediaList = _genreMediaService.GetMediaByGenre(genreGuid, queryParams.Page, queryParams.PageSize);
             if (mediaList == null || !mediaList.Any())
-                return NotFound($"No media found for genre: {genreName}");
+                return NotFound($"No media found for genre: {genreGuid}");
 
             var result = mediaList.Select(m => new GetMediaByGenreDTO
             {
-                MediaId = m.Id,
+                Id = m.Id,
                 MediaUrl = GetUrl(nameof(MediaController.GetMediaById), new { mediaId = m.Id }),
-                Title = m.Titles.FirstOrDefault()?.Title1,
+                Title = m.DisplayTitle,
                 ReleaseYear = m.ReleaseYear,
                 Poster = m.Poster,
                 AverageRating = m.AverageRating,
+                ImdbRating = m.ImdbAverageRating
             });
 
-            return Ok(result);
+            return Ok(CreatePaging(nameof(GetMediaByGenre), result, result.Count(), queryParams));
         }
     }
 }

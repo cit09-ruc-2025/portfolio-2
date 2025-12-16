@@ -88,10 +88,10 @@ namespace DataServiceLayer.Services
             switch (sortBy)
             {
                 case MediaSortBy.ImdbAverageRating:
-                    query = query.OrderByDescending(m => m.ImdbAverageRating ?? 0);
+                    query = query.OrderByDescending(m => m.ImdbAverageRating ?? 0).ThenByDescending(m => m.Id);
                     break;
                 default:
-                    query = query.OrderByDescending(m => m.ReleaseYear ?? 0);
+                    query = query.OrderByDescending(m => m.ReleaseYear ?? 0).ThenByDescending(m => m.Id);
                     break;
             }
 
