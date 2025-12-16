@@ -12,6 +12,7 @@ namespace DataServiceLayer.Interfaces
         bool RemoveItemFromPlaylist(Guid listId, string itemId, bool isMedia, Guid currentUserId);
         bool DeletePlaylist(Guid listId, Guid currentUserId);
         List<UserList> GetPlaylistsByUserId(Guid userId);
+        UserList? GetPlaylistByPlaylistId(Guid playlistId);
 
     }
 }
