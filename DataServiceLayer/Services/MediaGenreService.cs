@@ -17,9 +17,9 @@ namespace DataServiceLayer.Services
             _db = new MediaDbContext(connectionString);
         }
 
-        public List<Media> GetMediaByGenre(Guid genreGuid, int pageNumber = 1, int pageSize = 10)
+        public List<Media> GetMediaByGenre(string genreName, int pageNumber = 1, int pageSize = 10)
         {
-            var result = _db.Genres.Where(g => g.Id == genreGuid)
+            var result = _db.Genres.Where(g => g.Name.ToLower() == genreName.ToLower())
                 .Include(g => g.Media)
                 .SelectMany(g => g.Media)
                 .Include(m => m.Titles)

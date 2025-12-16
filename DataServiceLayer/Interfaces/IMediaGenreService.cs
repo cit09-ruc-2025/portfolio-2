@@ -3,5 +3,5 @@ using System.Collections.Generic;
 
 public interface IMediaGenreService
 {
-    List<Media> GetMediaByGenre(Guid genreGuid, int pageNumber = 1, int pageSize = 10);
+    List<Media> GetMediaByGenre(string genreName, int pageNumber = 1, int pageSize = 10);
 }

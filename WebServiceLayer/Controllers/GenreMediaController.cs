@@ -18,12 +18,12 @@ namespace WebServicesLayer.Controllers
             _genreMediaService = genreMediaService;
         }
 
-        [HttpGet("{genreGuid}", Name = nameof(GetMediaByGenre))]
-        public IActionResult GetMediaByGenre(Guid genreGuid, [FromQuery] QueryParams queryParams)
+        [HttpGet("{genreName}", Name = nameof(GetMediaByGenre))]
+        public IActionResult GetMediaByGenre(string genreName, [FromQuery] QueryParams queryParams)
         {
-            var mediaList = _genreMediaService.GetMediaByGenre(genreGuid, queryParams.Page, queryParams.PageSize);
+            var mediaList = _genreMediaService.GetMediaByGenre(genreName, queryParams.Page, queryParams.PageSize);
             if (mediaList == null || !mediaList.Any())
-                return NotFound($"No media found for genre: {genreGuid}");
+                return NotFound($"No media found for genre: {genreName}");
 
             var result = mediaList.Select(m => new GetMediaByGenreDTO
             {
