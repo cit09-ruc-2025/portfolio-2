@@ -6,6 +6,7 @@ using DataServiceLayer.Dtos;
 using DataServiceLayer.Helpers;
 using DataServiceLayer.Interfaces;
 using DataServiceLayer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataServiceLayer.Services
 {
@@ -38,7 +39,12 @@ namespace DataServiceLayer.Services
         {
             var db = new MediaDbContext(_connectionString);
 
-            return db.RecentlyVieweds.Where(x => x.UserId == userId).GetPaginatedResult(page, pageSize);
+            return db.RecentlyVieweds
+                .Where(x => x.UserId == userId)
+                .Include(x => x.Media)
+                .ThenInclude(x => x.Titles)
+                .Include(x => x.People)
+                .GetPaginatedResult(page, pageSize);
         }
 
     }

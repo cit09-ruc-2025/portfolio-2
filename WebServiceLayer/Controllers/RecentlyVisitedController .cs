@@ -59,7 +59,6 @@ namespace WebServiceLayer.Controllers
             if (!string.IsNullOrWhiteSpace(recentRecord?.PeopleId))
             {
                 var people = _peopleService.GetPersonById(recentRecord.PeopleId);
-                Console.WriteLine(people);
                 if (people == null)
                 {
                     return NotFound(new { message = "PEOPLE_NOT_FOUND" });
@@ -87,8 +86,36 @@ namespace WebServiceLayer.Controllers
         private RecentlyVisitedDTO CreateRecentlyViewed(RecentlyViewed recentlyVisited)
         {
             var model = _mapper.Map<RecentlyVisitedDTO>(recentlyVisited);
-            model.MediaUrl = GetUrl(nameof(MediaController.GetMediaById), new { mediaId = recentlyVisited.MediaId });
-            model.PeopleUrl = GetUrl(nameof(PeopleController.GetPeople), new { peopleId = recentlyVisited.PeopleId });
+
+
+            if (recentlyVisited.MediaId != null)
+            {
+                model.Media = _mapper.Map<MediaDTO>(recentlyVisited.Media!);
+                model.Media.DisplayTitle = recentlyVisited
+                    .Media!
+                    .Titles
+                    ?.OrderBy(x => x.Ordering)
+                    ?.FirstOrDefault()
+                    ?.Title1;
+
+                model.MediaUrl = GetUrl(
+                    nameof(MediaController.GetMediaById),
+                    new { mediaId = recentlyVisited.MediaId }
+                );
+
+                model.PeopleUrl = null;
+            }
+            else if (recentlyVisited.PeopleId != null)
+            {
+                model.People = _mapper.Map<PeopleDTO>(recentlyVisited.People!);
+                model.PeopleUrl = GetUrl(
+                    nameof(PeopleController.GetPeople),
+                    new { peopleId = recentlyVisited.PeopleId }
+                );
+                model.MediaUrl = null;
+
+            }
+
             return model;
         }
     }
