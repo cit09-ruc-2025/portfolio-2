@@ -40,7 +40,7 @@ namespace WebServiceLayer.Controllers
                dto.Title = mp.Media?.Titles.OrderBy(x => x.Ordering)?.FirstOrDefault()?.Title1;
                dto.ImdbRating = mp.Media?.ImdbAverageRating;
                dto.ReleaseYear = mp.Media?.ReleaseYear;
-
+               dto.HasEpisodes = mp.Media?.EpisodeSeriesMedia.Any() ?? false;
                return dto;
            }).ToList();
 

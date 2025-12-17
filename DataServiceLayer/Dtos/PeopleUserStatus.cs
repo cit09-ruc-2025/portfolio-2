@@ -8,6 +8,7 @@ namespace DataServiceLayer.Dtos
     public class PeopleUserStatus
     {
         public bool IsFavorite { get; set; }
+        public List<Guid> Playlists { get; set; } = new();
 
     }
 }

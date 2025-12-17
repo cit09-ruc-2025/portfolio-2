@@ -20,7 +20,7 @@ namespace WebServiceLayer.Controllers
             _playlistService = playlistService;
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize]
         public IActionResult CreatePlaylist([FromBody] CreatePlaylistDTO request)
         {
@@ -28,7 +28,19 @@ namespace WebServiceLayer.Controllers
             if (userIdClaim == null) return Unauthorized();
 
             var currentUserId = Guid.Parse(userIdClaim.Value);
-            var playlist = _playlistService.CreatePlaylist(currentUserId, request.Title, request.Description);
+            var playlist = _playlistService.CreatePlaylist(currentUserId, request.Title, request.Description, request.IsPublic);
+            return Ok(playlist);
+        }
+
+        [HttpPut("{playlistId}")]
+        [Authorize]
+        public IActionResult UpdatePlaylist([FromRoute] Guid playlistId, [FromBody] CreatePlaylistDTO request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            if (userIdClaim == null) return Unauthorized();
+
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var playlist = _playlistService.UpdatePlaylist(currentUserId, playlistId, request.Title, request.Description, request.IsPublic);
             return Ok(playlist);
         }
 
@@ -45,15 +57,15 @@ namespace WebServiceLayer.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{playlistId}/remove")]
+        [HttpDelete("{playlistId}/remove/{itemId}")]
         [Authorize]
-        public IActionResult RemoveItemFromPlaylist(Guid playlistId, [FromBody] AddItemToPlaylistDTO request)
+        public IActionResult RemoveItemFromPlaylist([FromRoute] Guid playlistId, string itemId, [FromQuery] bool isMedia)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
             if (userIdClaim == null) return Unauthorized();
 
             var currentUserId = Guid.Parse(userIdClaim.Value);
-            var result = _playlistService.RemoveItemFromPlaylist(playlistId, request.ItemId, request.IsMedia, currentUserId);
+            var result = _playlistService.RemoveItemFromPlaylist(playlistId, itemId, isMedia, currentUserId);
             if (!result) return BadRequest(new { message = "Failed to remove item" });
             return Ok(result);
         }
@@ -74,7 +86,16 @@ namespace WebServiceLayer.Controllers
         [HttpGet("user/{userId}")]
         public IActionResult GetPlaylistsByUserId(Guid userId)
         {
-            var playlists = _playlistService.GetPlaylistsByUserId(userId);
+            Guid? loggedUserId = null;
+
+            var idClaim = User.FindFirst("id")?.Value;
+
+            if (Guid.TryParse(idClaim, out var parsedId))
+            {
+                loggedUserId = parsedId;
+            }
+
+            var playlists = _playlistService.GetPlaylistsByUserId(userId, loggedUserId);
             var dto = playlists.Select(MapToDTO).ToList();
             return Ok(dto);
         }
@@ -82,10 +103,21 @@ namespace WebServiceLayer.Controllers
         [HttpGet("{playlistId}")]
         public IActionResult GetPlaylistsByPlaylistId(Guid playlistId)
         {
-            var playlist = _playlistService.GetPlaylistByPlaylistId(playlistId);
+            Guid? loggedUserId = null;
+
+            var idClaim = User.FindFirst("id")?.Value;
+
+            if (Guid.TryParse(idClaim, out var parsedId))
+            {
+                loggedUserId = parsedId;
+            }
+
+            var playlist = _playlistService.GetPlaylistDetailByPlaylistId(playlistId, loggedUserId);
 
             if (playlist == null) return NotFound();
+
             var dto = MapToDTO(playlist);
+
             return Ok(dto);
         }
 
@@ -108,15 +140,24 @@ namespace WebServiceLayer.Controllers
             var mediaDtoList = playlist.Media.Select(m => new MediaDTO
             {
                 Id = m.Id,
-                DisplayTitle = m.DisplayTitle,
+                DisplayTitle = m.Titles?.OrderBy(x => x.Ordering)?.FirstOrDefault()?.Title1,
                 ReleaseYear = m.ReleaseYear,
                 AgeRating = m.AgeRating,
                 Poster = m.Poster,
                 AverageRating = m.AverageRating,
                 ImdbAverageRating = m.ImdbAverageRating,
+                HasEpisodes = m.EpisodeSeriesMedia.Any()
+
+            }).ToList();
+
+            var peopleDtoList = playlist.People.Select(m => new PeopleDTO
+            {
+                Id = m.Id,
+                Name = m.Name
             }).ToList();
 
             playlistDto.Media = mediaDtoList;
+            playlistDto.People = peopleDtoList;
             return playlistDto;
         }
     }

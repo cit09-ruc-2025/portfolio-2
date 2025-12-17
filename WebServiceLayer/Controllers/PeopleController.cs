@@ -16,13 +16,15 @@ namespace WebServiceLayer.Controllers
         private readonly IPeopleService _peopleService;
         private readonly IMediaService _mediaService;
         private readonly IFavoriteService _favoriteService;
+        private readonly IPlaylistService _playlistService;
         private readonly IMapper _mapper;
 
-        public PeopleController(IPeopleService peopleService, IMediaService mediaService, IFavoriteService favoriteService, IMapper mapper, LinkGenerator generator) : base(generator)
+        public PeopleController(IPeopleService peopleService, IMediaService mediaService, IFavoriteService favoriteService, IPlaylistService playlistService, IMapper mapper, LinkGenerator generator) : base(generator)
         {
             _peopleService = peopleService;
             _mediaService = mediaService;
             _favoriteService = favoriteService;
+            _playlistService = playlistService;
 
             _mapper = mapper;
         }
@@ -53,7 +55,7 @@ namespace WebServiceLayer.Controllers
                 dto.Title = mp.Media?.Titles.OrderBy(x => x.Ordering)?.FirstOrDefault()?.Title1;
                 dto.ReleaseYear = mp.Media?.ReleaseYear ?? 0;
                 dto.ImdbAverageRating = mp.Media?.ImdbAverageRating;
-
+                dto.HasEpisodes = mp.Media?.EpisodeSeriesMedia.Any() ?? false;
                 return dto;
             }).ToList();
 
@@ -68,9 +70,12 @@ namespace WebServiceLayer.Controllers
 
             var isPeopleFavorite = _favoriteService.IsPeopleFavorite(peopleId, userId);
 
+            var playlists = _playlistService.IsPeopleInPlaylists(peopleId, userId);
+
             var peopleUserStatus = new PeopleUserStatus
             {
                 IsFavorite = isPeopleFavorite,
+                Playlists = playlists
 
             };
 

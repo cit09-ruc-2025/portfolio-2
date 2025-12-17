@@ -3,7 +3,7 @@
     public class MediaDTO
     {
         public string Id { get; set; } = null!;
-        
+
         public string? DisplayTitle { get; set; }
 
         public int? ReleaseYear { get; set; }
@@ -33,6 +33,6 @@
         public string? Metascore { get; set; }
 
         public decimal? AverageRating { get; set; }
-
+        public bool HasEpisodes { get; set; }
     }
 }

@@ -33,7 +33,9 @@ namespace WebServicesLayer.Controllers
                 ReleaseYear = m.ReleaseYear,
                 Poster = m.Poster,
                 AverageRating = m.AverageRating,
-                ImdbRating = m.ImdbAverageRating
+                ImdbRating = m.ImdbAverageRating,
+                HasEpisodes = m.EpisodeSeriesMedia.Any()
+
             });
 
             return Ok(CreatePaging(nameof(GetMediaByGenre), result, result.Count(), queryParams));

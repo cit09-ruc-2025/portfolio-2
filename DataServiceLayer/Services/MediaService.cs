@@ -76,11 +76,10 @@ namespace DataServiceLayer.Services
 
         }
 
-        public async Task<(List<Media> Items, int TotalCount)> GetAllMedia(int page, int pageSize, MediaSortBy sortBy = MediaSortBy.ReleaseYear)
+        public (List<MediaList> Items, int TotalCount) GetAllMedia(int page, int pageSize, MediaSortBy sortBy = MediaSortBy.ReleaseYear)
         {
             using var db = new MediaDbContext(_connectionString);
 
-            var totalCount = await db.Media.CountAsync();
 
             IQueryable<Media> query = db.Media
                 .Where(m => !m.EpisodeEpisodeMedia.Any());
@@ -95,25 +94,19 @@ namespace DataServiceLayer.Services
                     break;
             }
 
+            var mediaList = query.Include(m => m.Titles)
+                             .Select(m => new MediaList
+                             {
+                                 ImdbRating = m.ImdbAverageRating ?? 0,
+                                 Id = m.Id,
+                                 Poster = m.Poster,
+                                 ReleaseYear = m.ReleaseYear ?? 0,
+                                 Title = m.Titles.OrderBy(m => m.Ordering).FirstOrDefault().Title1,
+                                 HasEpisodes = m.EpisodeSeriesMedia.Any()
+                             }).
+                             GetPaginatedResult(page, pageSize);
 
-            var pagedMedia = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var ids = pagedMedia.Select(m => m.Id).ToList();
-
-            // Loading related data in separate queries to avoid the big join
-            await db.Media
-                .Where(m => ids.Contains(m.Id))
-                .Include(m => m.Genres)
-                .Include(m => m.DvdRelease)
-                .Include(m => m.Titles)
-                .LoadAsync();
-
-            var items = pagedMedia.Select(m => db.Media.Local.First(x => x.Id == m.Id)).ToList();
-
-            return (items, totalCount);
+            return mediaList;
         }
 
         public PaginatedResult<MediaList> GetByTitle(string keyword, int page, int pageSize)
@@ -129,19 +122,20 @@ namespace DataServiceLayer.Services
                 Items = query
                 .OrderByDescending(t => t.ImdbAverageRating.HasValue)
                 .ThenByDescending(t => t.ImdbAverageRating)
+                .Include(t => t.EpisodeSeriesMedia)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(m => new MediaList
                 {
-                    MediaId = m.Id,
+                    Id = m.Id,
                     Title = m.Titles
                     .OrderBy(t => t.Ordering)
                     .Select(t => t.Title1)
                     .FirstOrDefault() ?? "",
                     Poster = m.Poster ?? "",
                     ReleaseYear = m.ReleaseYear ?? 0,
-                    ImdbRating = m.ImdbAverageRating ?? 0
-
+                    ImdbRating = m.ImdbAverageRating ?? 0,
+                    HasEpisodes = m.EpisodeSeriesMedia.Any()
                 })
                 .ToList()
             };
@@ -154,6 +148,7 @@ namespace DataServiceLayer.Services
             var baseQuery = db.MediaPeople
                 .Include(p => p.Media)
                 .ThenInclude(p => p.Titles)
+                .Include(p => p.Media.EpisodeSeriesMedia)
                 .Where(mp => mp.PeopleId == peopleId)
                 .Where(mp => !mp.Media.EpisodeEpisodeMedia.Any())
                 .OrderBy(mp => mp.Ordering);

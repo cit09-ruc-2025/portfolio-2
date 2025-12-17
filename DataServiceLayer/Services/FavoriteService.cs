@@ -108,7 +108,7 @@ namespace DataServiceLayer.Services
         public (List<FavoriteMedia> FavoriteMedia, int TotalCount) GetFavoriteMedia(Guid userId, int pageNumber, int pageSize)
         {
             var context = CreateContext();
-            return context.FavoriteMedia.Where(fp => fp.UserId == userId).Include(x => x.Media).ThenInclude(x => x.Titles).GetPaginatedResult(pageNumber, pageSize);
+            return context.FavoriteMedia.Where(fp => fp.UserId == userId).Include(x => x.Media).ThenInclude(x => x.Titles).Include(x => x.Media.EpisodeSeriesMedia).GetPaginatedResult(pageNumber, pageSize);
         }
 
         public bool IsMediaFavorite(string mediaId, Guid userId)

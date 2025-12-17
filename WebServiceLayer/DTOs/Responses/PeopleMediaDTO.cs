@@ -11,5 +11,6 @@ namespace WebServiceLayer.DTOs.Responses
         public string Title { get; set; } = "";
         public int ReleaseYear { get; set; }
         public decimal? ImdbAverageRating { get; set; }
+        public bool HasEpisodes { get; set; }
     }
 }
