@@ -146,6 +146,8 @@ namespace WebServiceLayer.Controllers
                 Poster = m.Poster,
                 AverageRating = m.AverageRating,
                 ImdbAverageRating = m.ImdbAverageRating,
+                HasEpisodes = m.EpisodeSeriesMedia.Any()
+
             }).ToList();
 
             var peopleDtoList = playlist.People.Select(m => new PeopleDTO

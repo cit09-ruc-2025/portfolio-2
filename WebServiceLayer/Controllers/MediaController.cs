@@ -178,27 +178,13 @@ namespace WebServiceLayer.Controllers
                 }
             }
 
-            var (items, total) = await _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize, validSort);
+            var (items, total) = _mediaService.GetAllMedia(queryParams.Page, queryParams.PageSize, validSort);
 
             if (items.Count == 0)
                 return NoContent();
 
-            var mapped = items.Select(m => new
-            {
-                id = m.Id,
-                title = m.DisplayTitle,
-                releaseYear = m.ReleaseYear,
-                ageRating = m.AgeRating,
-                poster = m.Poster,
-                genres = m.Genres.Select(g => g.Name),
-                dvdReleaseDate = m.DvdRelease?.ReleaseDate,
-                episode = m.EpisodeEpisodeMedia,
-                averageRating = m.AverageRating,
-                imdbRating = m.ImdbAverageRating,
-                mediaType = m.MediaType
-            });
 
-            var result = CreatePaging(nameof(GetMediaList), mapped, total, queryParams);
+            var result = CreatePaging(nameof(GetMediaList), items, total, queryParams);
             return Ok(result);
         }
 

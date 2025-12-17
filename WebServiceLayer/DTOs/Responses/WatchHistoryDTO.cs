@@ -10,5 +10,7 @@ namespace WebServiceLayer.DTOs.Responses
         public decimal? ImdbAverageRating { get; set; }
         public int? ReleaseYear { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public bool HasEpisodes { get; set; }
+
     }
 }

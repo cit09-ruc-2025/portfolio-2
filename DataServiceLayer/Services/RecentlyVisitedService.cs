@@ -43,6 +43,8 @@ namespace DataServiceLayer.Services
                 .Where(x => x.UserId == userId)
                 .Include(x => x.Media)
                 .ThenInclude(x => x.Titles)
+                .Include(x => x.Media)
+                .ThenInclude(x => x.EpisodeSeriesMedia)
                 .Include(x => x.People)
                 .GetPaginatedResult(page, pageSize);
         }

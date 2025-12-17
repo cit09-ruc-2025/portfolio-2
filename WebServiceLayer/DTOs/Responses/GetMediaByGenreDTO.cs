@@ -15,5 +15,6 @@ namespace WebServiceLayer.Models
         public decimal? AverageRating { get; set; }
         public string? MediaUrl { get; set; }
         public decimal? ImdbRating { get; set; }
+        public bool HasEpisodes { get; set; }
     }
 }

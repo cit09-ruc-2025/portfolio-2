@@ -23,6 +23,7 @@ namespace DataServiceLayer.Services
                 .Include(g => g.Media)
                 .SelectMany(g => g.Media)
                 .Include(m => m.Titles)
+                .Include(m => m.EpisodeSeriesMedia)
                 .Where(m => !m.EpisodeEpisodeMedia.Any())
                 .OrderByDescending(m => m.ImdbNumberOfVotes ?? 0)
                 .ThenByDescending(m => m.ImdbAverageRating ?? 0)

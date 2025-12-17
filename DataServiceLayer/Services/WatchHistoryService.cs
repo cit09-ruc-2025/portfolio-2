@@ -23,7 +23,7 @@ namespace DataServiceLayer.Services
         {
             var context = CreateContext();
 
-            var baseQuery = context.WatchHistories.Where(wh => wh.UserId == userGuid).Include(x => x.Media).ThenInclude(x => x.Titles).OrderBy(x => x.CreatedAt);
+            var baseQuery = context.WatchHistories.Where(wh => wh.UserId == userGuid).Include(x => x.Media).ThenInclude(x => x.Titles).Include(x => x.Media.EpisodeSeriesMedia).OrderBy(x => x.CreatedAt);
             return baseQuery.GetPaginatedResult(pageNumber, pageSize);
         }
 

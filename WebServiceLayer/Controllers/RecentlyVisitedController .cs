@@ -97,6 +97,7 @@ namespace WebServiceLayer.Controllers
                     ?.OrderBy(x => x.Ordering)
                     ?.FirstOrDefault()
                     ?.Title1;
+                model.Media.HasEpisodes = recentlyVisited.Media.EpisodeSeriesMedia.Any();
 
                 model.MediaUrl = GetUrl(
                     nameof(MediaController.GetMediaById),

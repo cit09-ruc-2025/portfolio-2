@@ -136,6 +136,8 @@ namespace DataServiceLayer.Services
                 .Include(p => p.People)
                 .Include(p => p.Media)
                 .ThenInclude(m => m.Titles)
+                .Include(p => p.Media)
+                .ThenInclude(m => m.EpisodeSeriesMedia)
                 .FirstOrDefault();
         }
 
