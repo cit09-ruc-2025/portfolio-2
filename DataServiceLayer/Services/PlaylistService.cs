@@ -20,7 +20,6 @@ namespace DataServiceLayer.Services
         {
             var playlist = new UserList
             {
-                Id = Guid.NewGuid(),
                 UserId = currentUserId,
                 Title = title,
                 Description = description,
